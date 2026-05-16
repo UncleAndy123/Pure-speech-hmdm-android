@@ -44,7 +44,7 @@ import java.util.Map;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 
-public class BaseAppListAdapter extends RecyclerView.Adapter<BaseAppListAdapter.ViewHolder> {
+public abstract class BaseAppListAdapter extends RecyclerView.Adapter<BaseAppListAdapter.ViewHolder> {
     protected LayoutInflater layoutInflater;
     protected List<AppInfo> items;
     protected Map<Integer, AppInfo> shortcuts;        // Keycode -> Application, filled in getInstalledApps()
@@ -91,6 +91,8 @@ public class BaseAppListAdapter extends RecyclerView.Adapter<BaseAppListAdapter.
         }
     }
 
+    public abstract void updateShortcuts(Activity parentActivity);
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ViewHolder viewHolder = new ViewHolder(layoutInflater.inflate(R.layout.item_app, parent, false));
@@ -104,7 +106,32 @@ public class BaseAppListAdapter extends RecyclerView.Adapter<BaseAppListAdapter.
         AppInfo appInfo = items.get(position);
         holder.binding.rootLinearLayout.setTag(appInfo);
         holder.binding.textView.setText(appInfo.name);
+// In onBindViewHolder(), after setting tag:
+        int col = position % spanCount;
+        int row = position / spanCount;
+        int total = getItemCount();
 
+// Wrap left edge → go to previous row's last item
+// Wrap right edge → go to next row's first item  
+// These are handled by the GridLayoutManager already for UP/DOWN.
+// For LEFT/RIGHT wrapping at edges:
+        holder.itemView.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && col == 0 && position > 0) {
+                // Jump to end of previous row
+                RecyclerView rv = (RecyclerView) v.getParent();
+                RecyclerView.ViewHolder prev = rv.findViewHolderForAdapterPosition(position - 1);
+                if (prev != null) prev.itemView.requestFocus();
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && col == spanCount - 1 && position < total - 1) {
+                RecyclerView rv = (RecyclerView) v.getParent();
+                RecyclerView.ViewHolder next = rv.findViewHolderForAdapterPosition(position + 1);
+                if (next != null) next.itemView.requestFocus();
+                return true;
+            }
+            return false;
+        });
         if (settingsHelper.getConfig().getTextColor() != null && !settingsHelper.getConfig().getTextColor().trim().equals("")) {
             try {
                 holder.binding.textView.setTextColor(Color.parseColor(settingsHelper.getConfig().getTextColor()));
