@@ -1,90 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Home customization screen — light theme, 240x320, dpad-first.
-    Wallpaper section: gallery pick + 8 colour presets + reset.
+    Home customization screen — dark unified theme, dpad-first.
+    Sections:
+      1. Background / wallpaper
+      2. App visibility (hide/show server-allowed apps)
+      3. Save button
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="HardcodedText,SmallSp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F7">
+    android:background="#121212"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="14dp">
 
-        <!-- Header -->
+        <!-- ============================= -->
+        <!-- HEADER                        -->
+        <!-- ============================= -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="HOME SCREEN SETTINGS"
-            android:textColor="#8E8E93"
+            android:text="HOME SCREEN"
+            android:textColor="#FFFFFF"
             android:textStyle="bold"
-            android:textSize="10sp"
+            android:textSize="18sp"
             android:gravity="center"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="4dp" />
 
-        <!-- Wallpaper card -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Customize appearance and visible apps"
+            android:textColor="#888888"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- ============================= -->
+        <!-- BACKGROUND CARD               -->
+        <!-- ============================= -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#FFFFFF"
-            android:elevation="1dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:layout_marginBottom="10dp">
+            android:background="#1E1E1E"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="WALLPAPER"
-                android:textColor="#8E8E93"
+                android:text="BACKGROUND"
+                android:textColor="#888888"
                 android:textStyle="bold"
                 android:textSize="10sp"
-                android:layout_marginBottom="6dp" />
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="8dp" />
 
             <!-- Current status -->
             <TextView
                 android:id="@+id/custom_current_wallpaper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Current: default"
-                android:textColor="#8E8E93"
+                android:text="Background: MDM default"
+                android:textColor="#AAAAAA"
                 android:textSize="12sp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="12dp" />
 
-            <!-- Gallery button -->
+            <!-- Gallery picker -->
             <Button
                 android:id="@+id/custom_gallery_btn"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
-                android:text="Choose from Gallery"
+                android:text="Choose Image from Gallery"
                 android:textSize="13sp"
-                android:textStyle="bold"
-                android:background="@drawable/modern_button_selector"
-                android:textColor="@color/history_text_selector"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1565C0"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:stateListAnimator="@null"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="12dp" />
 
-            <!-- Color presets label -->
+            <!-- Section label -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="SOLID COLORS"
-                android:textColor="#8E8E93"
+                android:textColor="#888888"
                 android:textStyle="bold"
                 android:textSize="10sp"
+                android:letterSpacing="0.1"
                 android:layout_marginBottom="6dp" />
 
-            <!-- Colour row 1 -->
+            <!-- Color row 1 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -94,11 +108,12 @@
                 <Button
                     android:id="@+id/color_btn_0"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:layout_marginRight="2dp"
+                    android:layout_marginRight="3dp"
                     android:text="Black"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
@@ -106,11 +121,12 @@
                 <Button
                     android:id="@+id/color_btn_1"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:layout_marginRight="2dp"
-                    android:text="Navy"
+                    android:layout_marginRight="3dp"
+                    android:text="Dark"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
@@ -118,11 +134,12 @@
                 <Button
                     android:id="@+id/color_btn_2"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:layout_marginRight="2dp"
-                    android:text="Forest"
+                    android:layout_marginRight="3dp"
+                    android:text="Navy"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
@@ -130,31 +147,33 @@
                 <Button
                     android:id="@+id/color_btn_3"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:text="Purple"
+                    android:text="Forest"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
 
             </LinearLayout>
 
-            <!-- Colour row 2 -->
+            <!-- Color row 2 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="10dp">
+                android:layout_marginBottom="12dp">
 
                 <Button
                     android:id="@+id/color_btn_4"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:layout_marginRight="2dp"
-                    android:text="Burgundy"
+                    android:layout_marginRight="3dp"
+                    android:text="Purple"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
@@ -162,11 +181,12 @@
                 <Button
                     android:id="@+id/color_btn_5"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:layout_marginRight="2dp"
-                    android:text="Slate"
+                    android:layout_marginRight="3dp"
+                    android:text="Burgundy"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
@@ -174,11 +194,12 @@
                 <Button
                     android:id="@+id/color_btn_6"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:layout_marginRight="2dp"
-                    android:text="Charcoal"
+                    android:layout_marginRight="3dp"
+                    android:text="Slate"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
@@ -186,45 +207,86 @@
                 <Button
                     android:id="@+id/color_btn_7"
                     android:layout_width="0dp"
-                    android:layout_height="38dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:text="Dusk"
                     android:textSize="10sp"
+                    android:textColor="#FFFFFF"
                     android:stateListAnimator="@null"
                     android:focusable="true"
                     android:focusableInTouchMode="true" />
 
             </LinearLayout>
 
-            <!-- Reset -->
+            <!-- Reset to MDM default -->
             <Button
                 android:id="@+id/custom_reset_btn"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:text="Reset to Default"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:background="@drawable/modern_button_selector"
-                android:textColor="@color/history_text_selector"
+                android:layout_height="40dp"
+                android:text="Reset to MDM Default"
+                android:textSize="12sp"
+                android:textColor="#AAAAAA"
+                android:backgroundTint="#2C2C2C"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:stateListAnimator="@null" />
 
         </LinearLayout>
 
-        <!-- Done button -->
-        <Button
-            android:id="@+id/custom_done_btn"
+        <!-- ============================= -->
+        <!-- APP VISIBILITY CARD           -->
+        <!-- ============================= -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="DONE"
-            android:textSize="15sp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1E1E1E"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="APP VISIBILITY"
+                android:textColor="#888888"
+                android:textStyle="bold"
+                android:textSize="10sp"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hide apps from your home screen. Only apps allowed by your administrator are listed."
+                android:textColor="#666666"
+                android:textSize="11sp"
+                android:layout_marginBottom="10dp" />
+
+            <!-- App list — height constrained so ScrollView works correctly -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/custom_app_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+
+        <!-- ============================= -->
+        <!-- SAVE BUTTON                   -->
+        <!-- ============================= -->
+        <Button
+            android:id="@+id/custom_save_btn"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="SAVE SETTINGS"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#34C759"
+            android:backgroundTint="#1B5E20"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:stateListAnimator="@null" />
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="8dp" />
 
     </LinearLayout>
 

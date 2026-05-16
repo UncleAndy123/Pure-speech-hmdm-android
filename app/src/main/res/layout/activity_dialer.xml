@@ -1,55 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Modern Light Theme Dialer for Kyocera E4610 (240x320)
-    Optimized for D-Pad navigation with high-contrast focus states.
+    Unified dialer + call history screen.
+
+    Tab bar at top: CONTACTS | ALL | MISSED | IN | OUT
+    Below: either the contacts section or history section, mutually exclusive.
+
+    Contacts section: search field + contact list (unchanged)
+    History section:  call log list + empty label
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:ignore="HardcodedText,SmallSp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F7"
-    tools:ignore="HardcodedText,SmallSp">
+    android:background="#F5F5F7">
 
-    <!-- Top Section: Input Card -->
+    <!-- ============================================================ -->
+    <!-- HEADER CARD — title + tab bar                                -->
+    <!-- ============================================================ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:background="#FFFFFF"
         android:elevation="2dp"
-        android:paddingHorizontal="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
         android:paddingTop="10dp"
-        android:paddingBottom="8dp">
+        android:paddingBottom="8dp"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="DIAL OR SEARCH"
+            android:text="PHONE"
             android:textColor="#8E8E93"
             android:textStyle="bold"
-            android:letterSpacing="0.05"
             android:textSize="10sp"
-            android:layout_marginBottom="4dp" />
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="8dp" />
 
+        <!-- Tab row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/tab_contacts"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:layout_marginRight="2dp"
+                android:text="CONTACTS"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:background="@drawable/modern_button_selector"
+                android:textColor="@color/history_text_selector"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:stateListAnimator="@null" />
+
+            <Button
+                android:id="@+id/tab_all"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:layout_marginRight="2dp"
+                android:text="ALL"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:background="@drawable/modern_button_selector"
+                android:textColor="@color/history_text_selector"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:stateListAnimator="@null" />
+
+            <Button
+                android:id="@+id/tab_missed"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:layout_marginRight="2dp"
+                android:text="MISSED"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:background="@drawable/modern_button_selector"
+                android:textColor="@color/history_text_selector"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:stateListAnimator="@null" />
+
+            <Button
+                android:id="@+id/tab_incoming"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:layout_marginRight="2dp"
+                android:text="IN"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:background="@drawable/modern_button_selector"
+                android:textColor="@color/history_text_selector"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:stateListAnimator="@null" />
+
+            <Button
+                android:id="@+id/tab_outgoing"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:text="OUT"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:background="@drawable/modern_button_selector"
+                android:textColor="@color/history_text_selector"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:stateListAnimator="@null" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ============================================================ -->
+    <!-- CONTACTS SECTION                                              -->
+    <!-- Visible when CONTACTS tab is active                          -->
+    <!-- ============================================================ -->
+    <LinearLayout
+        android:id="@+id/dialer_contacts_section"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <!-- Search / dial input row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/search_field_background">
+            android:background="#FFFFFF"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:gravity="center_vertical">
 
             <EditText
                 android:id="@+id/dialer_search"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
-                android:hint="Name or number..."
-                android:textColorHint="#BCBCC0"
-                android:textColor="#1C1C1E"
-                android:textSize="18sp"
-                android:background="@android:color/transparent"
+                android:hint="Search or dial"
+                android:textSize="14sp"
                 android:inputType="phone"
                 android:imeOptions="actionDone"
                 android:singleLine="true"
@@ -70,90 +174,45 @@
                 android:backgroundTint="#34C759"
                 android:focusable="true"
                 android:visibility="gone"
-                android:nextFocusLeft="@+id/dialer_search"
-                android:nextFocusRight="@+id/dialer_backspace" />
+                android:nextFocusLeft="@+id/dialer_search" />
 
-            <Button
-                android:id="@+id/dialer_backspace"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:text="⌫"
-                android:textSize="18sp"
-                android:textColor="#8E8E93"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:focusable="true"
-                android:nextFocusLeft="@+id/dialer_dial_button" />
         </LinearLayout>
 
+        <!-- Contact list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dialer_contact_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:nextFocusUp="@+id/dialer_search" />
+
+    </LinearLayout>
+
+    <!-- ============================================================ -->
+    <!-- HISTORY SECTION                                               -->
+    <!-- Visible when ALL / MISSED / IN / OUT tab is active           -->
+    <!-- ============================================================ -->
+    <FrameLayout
+        android:id="@+id/dialer_history_section"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dialer_history_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
         <TextView
-            android:id="@+id/dialer_formatted_preview"
+            android:id="@+id/dialer_history_empty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#007AFF"
-            android:textSize="12sp"
-            android:paddingTop="4dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="No call history"
+            android:textColor="#8E8E93"
+            android:textSize="14sp"
             android:visibility="gone" />
-    </LinearLayout>
-    <!-- Add ABOVE the contacts RecyclerView, below the keypad -->
-    <Button
-        android:id="@+id/dialer_history_link"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:text="📋  Recent Calls"
-        android:textSize="13sp"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1565C0"
-        android:focusable="true" />
-    <!-- Header Row -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="28dp"
-        android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
-        android:gravity="center_vertical"
-        android:background="#F5F5F7">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="CONTACTS"
-            android:textColor="#8E8E93"
-            android:textStyle="bold"
-            android:textSize="11sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="STATUS"
-            android:textColor="#8E8E93"
-            android:textStyle="bold"
-            android:textSize="11sp" />
-    </LinearLayout>
-
-    <!-- Main List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/dialer_contact_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#FFFFFF"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:descendantFocusability="afterDescendants"
-        android:nextFocusUp="@+id/dialer_search"
-        android:scrollbars="vertical" />
-
-    <!-- Modern Bottom Navigation bar -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:padding="4dp"
-        android:elevation="8dp"
-        android:orientation="vertical">
-
-
-    </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

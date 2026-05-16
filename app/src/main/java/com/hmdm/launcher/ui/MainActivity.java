@@ -450,6 +450,12 @@ public class MainActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_GPS_STATE_CHANGE) startLocationServiceWithRetry();
+        if (requestCode == 3001 && resultCode == RESULT_OK ) {
+            applyLocalBackground();
+            //Redraw grid to reflect hidden app changes
+            needRedrawContentAfterReconfigure = true;
+            updateConfig(false);
+        }
     }
 
     private void initReceiver() {
@@ -1115,6 +1121,79 @@ public class MainActivity
         if (!Utils.setPasswordMode(config.getPasswordMode(), this)) postDelayedSystemSettingDialog(getString(R.string.message_set_password), new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD), null, true);
         return true;
     }
+    /**
+     * Applies the user's local background preference (set via HomeCustomizationActivity)
+     * ONLY when the MDM server has not set its own background.
+     *
+     * MDM always wins — this runs after the MDM background block and is a no-op
+     * if the server has configured either a backgroundColor or backgroundImageUrl.
+     */
+    private void applyLocalBackground() {
+        ServerConfig config = settingsHelper.getConfig();
+        if (config == null) return;
+
+        // MDM color is set — don't override it
+        boolean mdmHasColor = config.getBackgroundColor() != null
+                && !config.getBackgroundColor().trim().isEmpty();
+        // MDM image is set — don't override it
+        boolean mdmHasImage = config.getBackgroundImageUrl() != null
+                && !config.getBackgroundImageUrl().trim().isEmpty();
+
+        if (mdmHasColor && mdmHasImage) return; // MDM controls everything
+
+        SharedPreferences prefs = getSharedPreferences(
+                HomeCustomizationActivity.PREFS_NAME, MODE_PRIVATE);
+        String type = prefs.getString(
+                HomeCustomizationActivity.KEY_WALLPAPER_TYPE,
+                HomeCustomizationActivity.WALLPAPER_DEFAULT);
+
+        switch (type) {
+            case HomeCustomizationActivity.WALLPAPER_COLOR: {
+                if (mdmHasColor) break; // MDM color still wins
+                String hex = prefs.getString(
+                        HomeCustomizationActivity.KEY_WALLPAPER_COLOR, null);
+                if (hex != null) {
+                    try {
+                        binding.activityMainContentWrapper.setBackgroundColor(
+                                Color.parseColor(hex));
+                        binding.activityMainBackground.setImageDrawable(null);
+                    } catch (Exception e) { /* bad hex — ignore */ }
+                }
+                break;
+            }
+            case HomeCustomizationActivity.WALLPAPER_GALLERY: {
+                if (mdmHasImage) break;
+                String uriStr = prefs.getString(
+                        HomeCustomizationActivity.KEY_WALLPAPER_URI, null);
+                if (uriStr != null) {
+                    try {
+                        Uri uri = Uri.parse(uriStr);
+                        binding.activityMainContentWrapper.setBackgroundColor(Color.TRANSPARENT);
+                        // Use a fresh Picasso — NOT the shared 'picasso' field which
+                        // uses OkHttp3Downloader and cannot handle content:// URIs
+                        new Picasso.Builder(this)
+                                .build()
+                                .load(uri)
+                                .fit()
+                                .centerCrop()
+                                .into(binding.activityMainBackground);
+                    } catch (Exception e) {
+                        Log.w(Const.LOG_TAG, "applyLocalBackground: failed to load image URI: " + e.getMessage());
+                        prefs.edit()
+                                .putString(HomeCustomizationActivity.KEY_WALLPAPER_TYPE,
+                                        HomeCustomizationActivity.WALLPAPER_DEFAULT)
+                                .remove(HomeCustomizationActivity.KEY_WALLPAPER_URI)
+                                .apply();
+                    }
+                }
+                break;
+            }
+
+            default:
+                // WALLPAPER_DEFAULT — nothing to do, MDM default already applied above
+                break;
+        }
+    }
 
     private boolean isContentShown() { if (binding != null) return binding.getShowContent() != null && binding.getShowContent(); return false; }
 
@@ -1159,6 +1238,8 @@ public class MainActivity
                 }
                 picasso.load(config.getBackgroundImageUrl()).fit().centerCrop().into(binding.activityMainBackground);
             } else binding.activityMainBackground.setImageDrawable(null);
+            applyLocalBackground();
+
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point(); display.getSize(size);
             spanCount = (int)(size.x * 1.0f / getResources().getDimensionPixelSize(R.dimen.app_list_item_size));

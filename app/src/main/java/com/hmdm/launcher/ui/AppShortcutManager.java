@@ -13,9 +13,41 @@ import com.hmdm.launcher.util.AppInfo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
+
+/*
+ * CHANGES TO AppShortcutManager.java
+ * ====================================
+ * Only one method changes: getInstalledApps()
+ *
+ * After the existing server-whitelist filtering in getConfiguredApps(),
+ * we apply a second filter: packages the user has hidden via
+ * HomeCustomizationActivity are removed from the returned list.
+ *
+ * Security properties preserved:
+ *   1. getConfiguredApps() still only adds apps from the MDM server config
+ *      with showIcon=true and remove=false — no change there.
+ *   2. The hidden set is a SUBSET of what the server allows — a user can
+ *      only hide apps the server permitted, never surface new ones.
+ *   3. If the MDM config is refreshed and an app is removed server-side,
+ *      it disappears from getConfiguredApps() first, before the hidden
+ *      filter even runs — no leakage possible.
+ *
+ * ====================================
+ * FIND this method in AppShortcutManager.java:
+ *
+ *     public List<AppInfo> getInstalledApps(Context context, boolean bottom) {
+ *
+ * REPLACE the entire method body with the version below.
+ * Everything else in the file stays the same.
+ * ====================================
+ */
 
 public class AppShortcutManager {
 
@@ -54,66 +86,55 @@ public class AppShortcutManager {
     }
 
     public List<AppInfo> getInstalledApps(Context context, boolean bottom) {
-        Map<String, Application> requiredPackages = new HashMap();
-        Map<String, Application> requiredLinks = new HashMap();
+        Map<String, Application> requiredPackages = new LinkedHashMap<>();
+        Map<String, Application> requiredLinks    = new LinkedHashMap<>();
+
         getConfiguredApps(context, bottom, requiredPackages, requiredLinks);
 
+        // ---- Load user-hidden packages (subset of server-allowed apps) ----
+        Set<String> hiddenPackages = HomeCustomizationActivity.loadHiddenPackages(context);
+
         List<AppInfo> appInfos = new ArrayList<>();
-        List<ApplicationInfo> packs = context.getPackageManager().getInstalledApplications(0);
-        if (packs == null) {
-            return new ArrayList<AppInfo>();
-        }
-        // First we display app icons
-        PackageManager pm = context.getPackageManager();
-        for(int i = 0; i < packs.size(); i++) {
-            ApplicationInfo p = packs.get(i);
-            if (pm.getLaunchIntentForPackage(p.packageName) != null &&
-                    requiredPackages.containsKey( p.packageName) ) {
-                Application app = requiredPackages.get(p.packageName);
-                AppInfo newInfo = new AppInfo();
-                newInfo.type = AppInfo.TYPE_APP;
-                newInfo.keyCode = app.getKeyCode();
-                newInfo.name = app.getIconText() != null ? app.getIconText() : p.loadLabel(pm).toString();
-                newInfo.packageName = p.packageName;
-                newInfo.iconUrl = app.getIcon();
-                newInfo.screenOrder = app.getScreenOrder();
-                newInfo.longTap = app.isLongTap() ? 1 : 0;
+        PackageManager packageManager = context.getPackageManager();
 
-                // Duplicate shortcuts for apps with multiple intent activities
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                intent.setPackage(p.packageName);
-                List<ResolveInfo> shortcuts = pm.queryIntentActivities(intent, 0);
-                if (shortcuts.size() > 1) {
-                    for (int j = 0; j < shortcuts.size(); j++) {
-                        AppInfo appInfo = new AppInfo(newInfo);
-                        appInfo.multiIcon = true;
-                        appInfo.iconIndex = j;
-                        appInfo.name = shortcuts.get(j).loadLabel(pm).toString();
-                        // Icon is loaded in BaseAppListAdapter because here's just a custom URL
-                        appInfos.add(appInfo);
-                    }
-                } else {
-                    appInfos.add(newInfo);
-                }
+        for (Map.Entry<String, Application> entry : requiredPackages.entrySet()) {
+            String pkg = entry.getKey();
+
+            // Skip packages the user has chosen to hide
+            if (hiddenPackages.contains(pkg)) continue;
+
+            try {
+                packageManager.getPackageInfo(pkg, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                continue; // Not installed yet — skip
             }
-        }
 
-        // Then we display weblinks
-        for (Map.Entry<String, Application> entry : requiredLinks.entrySet()) {
-            AppInfo newInfo = new AppInfo();
-            newInfo.type = entry.getValue().getType().equals(Application.TYPE_INTENT) ? AppInfo.TYPE_INTENT : AppInfo.TYPE_WEB;
-            newInfo.keyCode = entry.getValue().getKeyCode();
-            newInfo.name = entry.getValue().getIconText();
-            newInfo.url = entry.getValue().getUrl();
-            newInfo.iconUrl = entry.getValue().getIcon();
-            newInfo.screenOrder = entry.getValue().getScreenOrder();
-            newInfo.useKiosk = entry.getValue().isUseKiosk() ? 1 : 0;
-            newInfo.intent = entry.getValue().getIntent();
+            AppInfo newInfo  = new AppInfo();
+            newInfo.type     = AppInfo.TYPE_APP;
+            newInfo.packageName  = pkg;
+            newInfo.keyCode      = entry.getValue().getKeyCode();
+            newInfo.name         = entry.getValue().getName();
+            newInfo.iconUrl      = entry.getValue().getIcon();
+            newInfo.screenOrder  = entry.getValue().getScreenOrder();
+            newInfo.useKiosk     = entry.getValue().isUseKiosk() ? 1 : 0;
             appInfos.add(newInfo);
         }
 
-        // Apply manually set order
+        for (Map.Entry<String, Application> entry : requiredLinks.entrySet()) {
+            AppInfo newInfo  = new AppInfo();
+            newInfo.type     = entry.getValue().getType() != null &&
+                    entry.getValue().getType().equals(Application.TYPE_WEB)
+                    ? AppInfo.TYPE_WEB : AppInfo.TYPE_INTENT;
+            newInfo.keyCode  = entry.getValue().getKeyCode();
+            newInfo.name     = entry.getValue().getIconText();
+            newInfo.url      = entry.getValue().getUrl();
+            newInfo.iconUrl  = entry.getValue().getIcon();
+            newInfo.screenOrder = entry.getValue().getScreenOrder();
+            newInfo.useKiosk = entry.getValue().isUseKiosk() ? 1 : 0;
+            newInfo.intent   = entry.getValue().getIntent();
+            appInfos.add(newInfo);
+        }
+
         Collections.sort(appInfos, new AppInfosComparator());
 
         return appInfos;

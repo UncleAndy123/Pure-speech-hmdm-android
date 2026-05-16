@@ -215,12 +215,16 @@
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
 
+
         <activity
             android:name=".ui.HomeCustomizationActivity"
-            android:label="Home Settings"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
+            android:exported="true"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="com.hmdm.launcher.action.HOME_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".dialer.IncomingCallActivity"
             android:label="Incoming Call"
