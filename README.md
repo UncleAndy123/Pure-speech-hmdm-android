@@ -2,7 +2,7 @@
 
 A powerful open-source Android MDM launcher, forked from [h-mdm/hmdm-android](https://github.com/h-mdm/hmdm-android) with added call whitelisting, a built-in custom dialer, and Device Owner enforcement.
 
-#Currently under Initial Development. Use at your own risk!
+# Currently under Initial Development. Use at your own risk!
 ---
 
 ## What This Fork Adds
@@ -165,7 +165,7 @@ git merge upstream/master
 Resolve any conflicts in the custom files (`CallWhitelistManager.java`, `CallWhitelistScreeningService.java`, the custom dialer activity, and `AndroidManifest.xml`) before rebuilding.
 
 ---
-###NOTICE! THIS CODE IS "AS-IS", NO WARRANTIES EXPRESSED OR IMPLIED. YOU ARE SOLELY RESPONSIBLE FOR USING THIS CODE. THIS MAY RUIN OR BRICK YOUR DEVICE. 
+### NOTICE! THIS CODE IS "AS-IS", NO WARRANTIES EXPRESSED OR IMPLIED. YOU ARE SOLELY RESPONSIBLE FOR USING THIS CODE. THIS MAY RUIN OR BRICK YOUR DEVICE. 
 ## Related
 
 - [Headwind MDM Server (Docker setup)](https://github.com/h-mdm/hmdm-server) — the companion server this client connects to
