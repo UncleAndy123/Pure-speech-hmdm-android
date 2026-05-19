@@ -99,11 +99,11 @@ public class CallHistoryAdapter extends RecyclerView.Adapter<CallHistoryAdapter.
             switch (item.type) {
                 case CallHistoryItem.TYPE_INCOMING:
                     typeView.setTextColor(Color.parseColor("#4CAF50")); // green
-                    nameView.setTextColor(Color.WHITE);
+                    nameView.setTextColor(Color.parseColor("#1C1C1E"));
                     break;
                 case CallHistoryItem.TYPE_OUTGOING:
                     typeView.setTextColor(Color.parseColor("#2196F3")); // blue
-                    nameView.setTextColor(Color.WHITE);
+                    nameView.setTextColor(Color.parseColor("#1C1C1E"));
                     break;
                 case CallHistoryItem.TYPE_MISSED:
                     typeView.setTextColor(Color.parseColor("#F44336")); // red

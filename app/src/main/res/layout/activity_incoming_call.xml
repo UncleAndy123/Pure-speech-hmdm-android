@@ -4,6 +4,7 @@
     Matches activity_in_call.xml style.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="HardcodedText,SmallSp"
     android:layout_width="match_parent"
