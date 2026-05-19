@@ -57,14 +57,15 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameView;
         private final TextView numberView;
-        private final View statusDot;
-        // lockIcon removed — replaced by statusLabel in layout
+        private final View     statusDot;
+        private final TextView statusLabel;   // ← add
 
         ViewHolder(View itemView) {
             super(itemView);
-            nameView = itemView.findViewById(R.id.contact_name);
-            numberView = itemView.findViewById(R.id.contact_number);
-            statusDot = itemView.findViewById(R.id.contact_status_dot);
+            nameView    = itemView.findViewById(R.id.contact_name);
+            numberView  = itemView.findViewById(R.id.contact_number);
+            statusDot   = itemView.findViewById(R.id.contact_status_dot);
+            statusLabel = itemView.findViewById(R.id.contact_status_label);  // ← add
         }
 
 
@@ -76,6 +77,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
          */
 
         void bind(ContactItem contact, OnContactSelectedListener listener) {
+            if (nameView == null || statusLabel == null) return; // safety
             nameView.setText(contact.name);
             numberView.setText(contact.number);
 
@@ -83,8 +85,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
             boolean isAllowed = CallWhitelistManager
                     .getInstance(itemView.getContext())
                     .isAllowed(contact.number);
-
-            TextView statusLabel = itemView.findViewById(R.id.contact_status_label);
 
             if (isAllowed) {
                 statusDot.setBackgroundResource(R.drawable.status_dot);

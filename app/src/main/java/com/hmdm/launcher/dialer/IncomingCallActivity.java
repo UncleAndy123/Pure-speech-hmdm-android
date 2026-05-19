@@ -19,6 +19,8 @@
 
 package com.hmdm.launcher.dialer;
 
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.telecom.Call;
@@ -34,7 +36,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hmdm.launcher.R;
 import com.hmdm.launcher.service.HmdmInCallService;
 import com.hmdm.launcher.util.CallWhitelistManager;
-
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 public class IncomingCallActivity extends AppCompatActivity {
 
     private static final String TAG = "IncomingCallActivity";
@@ -135,13 +140,34 @@ public class IncomingCallActivity extends AppCompatActivity {
             return false;
         });
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(HmdmInCallService.ACTION_CALL_ENDED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(callEndedReceiver, filter, RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(callEndedReceiver, filter);
+        }
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try { unregisterReceiver(callEndedReceiver); } catch (Exception e) { /* already gone */ }
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
     }
-
+    private final BroadcastReceiver callEndedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Call ended remotely — closing IncomingCallActivity");
+            finish();
+        }
+    };
     // -------------------------------------------------------------------------
     // Hardware key handling — green/red physical keys on Kyocera E4610
     // These keys fire onKeyDown at the Activity level regardless of focus,

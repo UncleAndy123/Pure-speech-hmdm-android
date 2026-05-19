@@ -13,12 +13,10 @@ import com.hmdm.launcher.util.AppInfo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 
 /*
@@ -86,57 +84,70 @@ public class AppShortcutManager {
     }
 
     public List<AppInfo> getInstalledApps(Context context, boolean bottom) {
-        Map<String, Application> requiredPackages = new LinkedHashMap<>();
-        Map<String, Application> requiredLinks    = new LinkedHashMap<>();
-
+        Map<String, Application> requiredPackages = new HashMap();
+        Map<String, Application> requiredLinks = new HashMap();
         getConfiguredApps(context, bottom, requiredPackages, requiredLinks);
 
-        // ---- Load user-hidden packages (subset of server-allowed apps) ----
-        Set<String> hiddenPackages = HomeCustomizationActivity.loadHiddenPackages(context);
+        // Remove packages the user has hidden via HomeCustomizationActivity
+        Set<String> hidden = HomeCustomizationActivity.loadHiddenPackages(context);
+        for (String pkg : hidden) {
+            requiredPackages.remove(pkg);
+        }
 
         List<AppInfo> appInfos = new ArrayList<>();
-        PackageManager packageManager = context.getPackageManager();
+        List<ApplicationInfo> packs = context.getPackageManager().getInstalledApplications(0);
+        if (packs == null) {
+            return new ArrayList<AppInfo>();
+        }
 
-        for (Map.Entry<String, Application> entry : requiredPackages.entrySet()) {
-            String pkg = entry.getKey();
+        PackageManager pm = context.getPackageManager();
+        for (int i = 0; i < packs.size(); i++) {
+            ApplicationInfo p = packs.get(i);
+            if (pm.getLaunchIntentForPackage(p.packageName) != null &&
+                    requiredPackages.containsKey(p.packageName)) {
+                Application app = requiredPackages.get(p.packageName);
+                AppInfo newInfo = new AppInfo();
+                newInfo.type = AppInfo.TYPE_APP;
+                newInfo.keyCode = app.getKeyCode();
+                newInfo.name = app.getIconText() != null ? app.getIconText() : p.loadLabel(pm).toString();
+                newInfo.packageName = p.packageName;
+                newInfo.iconUrl = app.getIcon();
+                newInfo.screenOrder = app.getScreenOrder();
+                newInfo.longTap = app.isLongTap() ? 1 : 0;
 
-            // Skip packages the user has chosen to hide
-            if (hiddenPackages.contains(pkg)) continue;
-
-            try {
-                packageManager.getPackageInfo(pkg, 0);
-            } catch (PackageManager.NameNotFoundException e) {
-                continue; // Not installed yet — skip
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                intent.setPackage(p.packageName);
+                List<ResolveInfo> shortcuts = pm.queryIntentActivities(intent, 0);
+                if (shortcuts.size() > 1) {
+                    for (int j = 0; j < shortcuts.size(); j++) {
+                        AppInfo appInfo = new AppInfo(newInfo);
+                        appInfo.multiIcon = true;
+                        appInfo.iconIndex = j;
+                        appInfo.name = shortcuts.get(j).loadLabel(pm).toString();
+                        appInfos.add(appInfo);
+                    }
+                } else {
+                    appInfos.add(newInfo);
+                }
             }
-
-            AppInfo newInfo  = new AppInfo();
-            newInfo.type     = AppInfo.TYPE_APP;
-            newInfo.packageName  = pkg;
-            newInfo.keyCode      = entry.getValue().getKeyCode();
-            newInfo.name         = entry.getValue().getName();
-            newInfo.iconUrl      = entry.getValue().getIcon();
-            newInfo.screenOrder  = entry.getValue().getScreenOrder();
-            newInfo.useKiosk     = entry.getValue().isUseKiosk() ? 1 : 0;
-            appInfos.add(newInfo);
         }
 
         for (Map.Entry<String, Application> entry : requiredLinks.entrySet()) {
-            AppInfo newInfo  = new AppInfo();
-            newInfo.type     = entry.getValue().getType() != null &&
-                    entry.getValue().getType().equals(Application.TYPE_WEB)
-                    ? AppInfo.TYPE_WEB : AppInfo.TYPE_INTENT;
-            newInfo.keyCode  = entry.getValue().getKeyCode();
-            newInfo.name     = entry.getValue().getIconText();
-            newInfo.url      = entry.getValue().getUrl();
-            newInfo.iconUrl  = entry.getValue().getIcon();
+            AppInfo newInfo = new AppInfo();
+            newInfo.type = entry.getValue().getType().equals(Application.TYPE_INTENT)
+                    ? AppInfo.TYPE_INTENT : AppInfo.TYPE_WEB;
+            newInfo.keyCode = entry.getValue().getKeyCode();
+            newInfo.name = entry.getValue().getIconText();
+            newInfo.url = entry.getValue().getUrl();
+            newInfo.iconUrl = entry.getValue().getIcon();
             newInfo.screenOrder = entry.getValue().getScreenOrder();
             newInfo.useKiosk = entry.getValue().isUseKiosk() ? 1 : 0;
-            newInfo.intent   = entry.getValue().getIntent();
+            newInfo.intent = entry.getValue().getIntent();
             appInfos.add(newInfo);
         }
 
         Collections.sort(appInfos, new AppInfosComparator());
-
         return appInfos;
     }
 

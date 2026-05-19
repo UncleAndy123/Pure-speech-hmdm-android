@@ -1238,7 +1238,7 @@ public class MainActivity
                 }
                 picasso.load(config.getBackgroundImageUrl()).fit().centerCrop().into(binding.activityMainBackground);
             } else binding.activityMainBackground.setImageDrawable(null);
-            applyLocalBackground();
+
 
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point(); display.getSize(size);
@@ -1263,6 +1263,7 @@ public class MainActivity
                 bottomAppListAdapter.notifyDataSetChanged();
             } else { bottomAppListAdapter = null; binding.activityBottomLayout.setVisibility(View.GONE); }
         }
+        applyLocalBackground();
         binding.loading.setVisibility(View.GONE); binding.setShowContent(true);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }

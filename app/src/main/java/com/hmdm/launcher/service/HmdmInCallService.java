@@ -36,7 +36,7 @@ public class HmdmInCallService extends InCallService {
     /** Broadcast action sent to InCallActivity when call becomes active */
     public static final String ACTION_CALL_CONNECTED =
             "com.hmdm.launcher.ACTION_CALL_CONNECTED";
-
+    public static final String ACTION_CALL_ENDED     = "com.hmdm.launcher.ACTION_CALL_ENDED";
     @SuppressLint("StaticFieldLeak")
     private static Call currentCall;
 
@@ -136,6 +136,10 @@ public class HmdmInCallService extends InCallService {
                         currentCall = null;
                         Log.d(TAG, "currentCall cleared");
                     }
+                    // ← ADD: notify IncomingCallActivity and InCallActivity to close
+                    Intent ended = new Intent(ACTION_CALL_ENDED);
+                    ended.setPackage(getPackageName());
+                    sendBroadcast(ended);
                 }
             }
         });
@@ -145,6 +149,9 @@ public class HmdmInCallService extends InCallService {
     public void onCallRemoved(Call call) {
         super.onCallRemoved(call);
         if (call.equals(currentCall)) currentCall = null;
+        Intent ended = new Intent(ACTION_CALL_ENDED);
+        ended.setPackage(getPackageName());
+        sendBroadcast(ended);
     }
 
     // =========================================================================
