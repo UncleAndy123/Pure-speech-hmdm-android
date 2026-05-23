@@ -48,6 +48,21 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/tab_all"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:layout_marginRight="2dp"
+                android:text="ALL"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:background="@drawable/modern_button_selector"
+                android:textColor="#FFFFFF"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:stateListAnimator="@null" />
+
+            <Button
                 android:id="@+id/tab_contacts"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
@@ -62,20 +77,6 @@
                 android:focusableInTouchMode="true"
                 android:stateListAnimator="@null" />
 
-            <Button
-                android:id="@+id/tab_all"
-                android:layout_width="0dp"
-                android:layout_height="34dp"
-                android:layout_weight="1"
-                android:layout_marginRight="2dp"
-                android:text="ALL"
-                android:textSize="9sp"
-                android:textStyle="bold"
-                android:background="@drawable/modern_button_selector"
-                android:textColor="#FFFFFF"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:stateListAnimator="@null" />
 
             <Button
                 android:id="@+id/tab_missed"
@@ -151,21 +152,21 @@
             <EditText
                 android:id="@+id/dialer_search"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:hint="Search name or number"
-                android:textSize="14sp"
-                android:inputType="text"
-                android:textColor="#1C1C1E"
-                android:textColorHint="#5A5A62"
                 android:background="#F2F2F7"
-                android:imeOptions="actionDone"
-                android:singleLine="true"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:paddingLeft="8dp"
+                android:hint="DIAL  OR SEARCH"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:nextFocusRight="@+id/dialer_dial_button"
                 android:nextFocusDown="@+id/dialer_contact_list"
-                android:nextFocusRight="@+id/dialer_dial_button" />
+                android:paddingLeft="8dp"
+                android:singleLine="true"
+                android:textColor="#1C1C1E"
+                android:textColorHint="#5A5A62"
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/dialer_dial_button"

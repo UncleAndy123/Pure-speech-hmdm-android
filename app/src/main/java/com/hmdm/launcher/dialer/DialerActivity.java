@@ -59,8 +59,8 @@ public class DialerActivity extends AppCompatActivity
     // -----------------------------------------------------------------------
     // Tab constants
     // -----------------------------------------------------------------------
-    private static final int TAB_CONTACTS = 0;
     private static final int TAB_ALL      = 1;
+    private static final int TAB_CONTACTS = 0;
     private static final int TAB_MISSED   = 2;
     private static final int TAB_INCOMING = 3;
     private static final int TAB_OUTGOING = 4;
@@ -87,8 +87,8 @@ public class DialerActivity extends AppCompatActivity
     // -----------------------------------------------------------------------
     // Tab buttons
     // -----------------------------------------------------------------------
-    private Button tabContacts;
     private Button tabAll;
+    private Button tabContacts;
     private Button tabMissed;
     private Button tabIncoming;
     private Button tabOutgoing;
@@ -105,19 +105,19 @@ public class DialerActivity extends AppCompatActivity
         setContentView(R.layout.activity_dialer);
 
         // ---- Tab buttons ----
-        tabContacts = findViewById(R.id.tab_contacts);
         tabAll      = findViewById(R.id.tab_all);
+        tabContacts = findViewById(R.id.tab_contacts);
         tabMissed   = findViewById(R.id.tab_missed);
         tabIncoming = findViewById(R.id.tab_incoming);
         tabOutgoing = findViewById(R.id.tab_outgoing);
-        tabButtons[TAB_CONTACTS] = tabContacts;
         tabButtons[TAB_ALL]      = tabAll;
+        tabButtons[TAB_CONTACTS] = tabContacts;
         tabButtons[TAB_MISSED]   = tabMissed;
         tabButtons[TAB_INCOMING] = tabIncoming;
         tabButtons[TAB_OUTGOING] = tabOutgoing;
 
-        tabContacts.setOnClickListener(v -> switchTab(TAB_CONTACTS));
         tabAll.setOnClickListener(v      -> switchTab(TAB_ALL));
+        tabContacts.setOnClickListener(v -> switchTab(TAB_CONTACTS));
         tabMissed.setOnClickListener(v   -> switchTab(TAB_MISSED));
         tabIncoming.setOnClickListener(v -> switchTab(TAB_INCOMING));
         tabOutgoing.setOnClickListener(v -> switchTab(TAB_OUTGOING));
@@ -193,7 +193,7 @@ public class DialerActivity extends AppCompatActivity
         historyList.setLayoutManager(new LinearLayoutManager(this));
         historyList.setAdapter(historyAdapter);
 
-        // ---- Initial state ----
+        // ---- Initial state ---- This is what the dialer will open up to.
         switchTab(TAB_CONTACTS);
         loadContacts();
     }
