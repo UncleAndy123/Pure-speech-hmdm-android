@@ -193,7 +193,6 @@
                 android:id="@+id/activity_bottom_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/phone_button_bar"
                 android:background="#FFFFFF"
                 android:elevation="2dp">
 

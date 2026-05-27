@@ -226,14 +226,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".dialer.IncomingCallActivity"
-            android:label="Incoming Call"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:showOnLockScreen="true"
-            android:turnScreenOn="true"
-            android:excludeFromRecents="true" />
-        <activity
             android:name=".ui.AdminActivity"
             android:excludeFromRecents="true"
             android:exported="false"/>

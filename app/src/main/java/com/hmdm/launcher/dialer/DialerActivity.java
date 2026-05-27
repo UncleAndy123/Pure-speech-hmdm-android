@@ -254,7 +254,8 @@ public class DialerActivity extends AppCompatActivity
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     new String[]{
                             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                            ContactsContract.CommonDataKinds.Phone.NUMBER
+                            ContactsContract.CommonDataKinds.Phone.NUMBER,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID
                     },
                     null, null,
                     ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
@@ -262,6 +263,8 @@ public class DialerActivity extends AppCompatActivity
                 while (cursor.moveToNext()) {
                     String name   = cursor.getString(0);
                     String number = cursor.getString(1);
+                    long   contactId = cursor.getLong(2);              // ← add this
+
                     if (name == null) name = number;
                     // Pass isAllowed so ContactsAdapter can show ALLOWED/BLOCKED label
                     loaded.add(new ContactItem(name, number, wm.isAllowed(number)));

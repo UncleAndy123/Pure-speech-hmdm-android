@@ -1,30 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Contact row — light theme, dpad-first, 240px wide.
-    Green dot = allowed, gray dot = blocked.
-    ALLOWED/BLOCKED label right-aligned.
+    Left:   status dot (green=allowed, gray=blocked)
+    Middle: name + number (takes remaining space)
+    Right:  CALL button (green, allowed contacts only) OR BLOCKED label
+
+    Row tap/click    → opens contact in default contacts app
+    CALL button tap  → goes to ConfirmCallActivity to place the call
+    D-pad center on row → opens contact
+    D-pad right from row → focuses CALL button
+    D-pad center on CALL button → places call
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
     android:layout_width="match_parent"
     android:layout_height="56dp"
-    android:background="@drawable/contact_item_selector"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="6dp"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp">
+    android:background="@drawable/contact_item_selector"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-    <!-- Status dot -->
+    <!-- Allowed/blocked dot -->
     <View
         android:id="@+id/contact_status_dot"
         android:layout_width="8dp"
         android:layout_height="8dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="8dp"
         android:background="@drawable/status_dot" />
 
-    <!-- Name + number -->
+    <!-- Name + number — takes all remaining space -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -35,32 +42,56 @@
             android:id="@+id/contact_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
+            android:textSize="14sp"
+            android:textStyle="bold"
             android:textColor="#1C1C1E"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:singleLine="true"
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/contact_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
+            android:textSize="11sp"
             android:textColor="#8E8E93"
-            android:textSize="12sp" />
+            android:singleLine="true" />
 
     </LinearLayout>
 
-    <!-- Status label -->
+    <!--
+        BLOCKED label — shown only for blocked contacts, CALL button hidden.
+        Visibility toggled in bind().
+    -->
     <TextView
         android:id="@+id/contact_status_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="6dp"
-        android:paddingTop="2dp"
-        android:paddingRight="6dp"
-        android:paddingBottom="2dp"
-        android:textSize="10sp"
-        android:textStyle="bold" />
+        android:text="BLOCKED"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:textColor="#FF3B30"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:visibility="gone" />
+
+    <!--
+        CALL button — shown only for allowed contacts, BLOCKED label hidden.
+        Compact so it fits the 240px screen.
+        Focusable independently for d-pad navigation.
+    -->
+    <Button
+        android:id="@+id/contact_call_button"
+        android:layout_width="48dp"
+        android:layout_height="34dp"
+        android:text="CALL"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#34C759"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:stateListAnimator="@null"
+        android:visibility="gone"
+        android:layout_marginLeft="4dp" />
 
 </LinearLayout>
