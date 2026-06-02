@@ -34,25 +34,27 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PHONE"
-            android:textColor="#8E8E93"
-            android:textStyle="bold"
-            android:textSize="10sp"
+            android:layout_marginBottom="8dp"
             android:letterSpacing="0.1"
-            android:layout_marginBottom="8dp" />
+            android:text="PHONE"
+            android:textColor="#757575"
+            android:textSize="10sp"
+            android:textStyle="bold" />
 
         <!-- Tab row -->
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/tab_all"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
-                android:layout_marginRight="2dp"
+                android:layout_marginEnd="2dp"
                 android:text="ALL"
                 android:textSize="9sp"
                 android:textStyle="bold"
@@ -60,14 +62,16 @@
                 android:textColor="#FFFFFF"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:stateListAnimator="@null" />
+
+                 android:stateListAnimator="@null" />
 
             <Button
                 android:id="@+id/tab_contacts"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
-                android:layout_marginRight="2dp"
+                android:layout_marginEnd="2dp"
                 android:text="CONTACTS"
                 android:textSize="9sp"
                 android:textStyle="bold"
@@ -80,10 +84,11 @@
 
             <Button
                 android:id="@+id/tab_missed"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
-                android:layout_marginRight="2dp"
+                android:layout_marginEnd="2dp"
                 android:text="MISSED"
                 android:textSize="9sp"
                 android:textStyle="bold"
@@ -95,21 +100,24 @@
 
             <Button
                 android:id="@+id/tab_incoming"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
+                android:layout_marginEnd="2dp"
                 android:layout_weight="1"
-                android:layout_marginRight="2dp"
-                android:text="IN"
-                android:textSize="9sp"
-                android:textStyle="bold"
                 android:background="@drawable/modern_button_selector"
-                android:textColor="#FFFFFF"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:stateListAnimator="@null" />
+                android:stateListAnimator="@null"
+                android:text="IN"
+                android:textColor="#FFFFFF"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                tools:ignore="TouchTargetSizeCheck" />
 
             <Button
                 android:id="@+id/tab_outgoing"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
@@ -153,19 +161,20 @@
                 android:id="@+id/dialer_search"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
+                android:layout_weight="4"
                 android:background="#F2F2F7"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:hint="DIAL  OR SEARCH"
+                android:hint="Press any key to Dial"
                 android:imeOptions="actionDone"
-                android:inputType="text"
+                android:inputType="phone"
+                android:digits="0123456789+*#- ()"
                 android:nextFocusRight="@+id/dialer_dial_button"
                 android:nextFocusDown="@+id/dialer_contact_list"
-                android:paddingLeft="8dp"
+                android:paddingStart="8dp"
                 android:singleLine="true"
                 android:textColor="#1C1C1E"
-                android:textColorHint="#5A5A62"
+                android:textColorHint="#1B1B1D"
                 android:textSize="14sp" />
 
             <Button

@@ -266,6 +266,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/custom_app_list"
                 android:layout_width="match_parent"
+                android:focusableInTouchMode="true"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
 

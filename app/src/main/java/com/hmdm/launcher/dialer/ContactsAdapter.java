@@ -105,6 +105,8 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
                 statusLabel.setVisibility(View.VISIBLE);
                 callButton.setVisibility(View.GONE);
             }
+            // Add this near the top of bind(), after the isAllowed block
+            callButton.setFocusable(false);
 
             // ---- Focus color flip for d-pad readability ----
             itemView.setOnFocusChangeListener((v, hasFocus) -> {
@@ -137,6 +139,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
                     case KeyEvent.KEYCODE_DPAD_RIGHT:
                         // Move focus to CALL button if visible
                         if (isAllowed && callButton.getVisibility() == View.VISIBLE) {
+                            callButton.setFocusable(true);
                             callButton.requestFocus();
                             return true;
                         }
@@ -156,6 +159,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
             if (isAllowed) {
                 callButton.setOnClickListener(v -> listener.onContactSelected(contact));
                 callButton.setOnKeyListener((v, keyCode, event) -> {
+
                     if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -163,6 +167,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
                         case KeyEvent.KEYCODE_CALL:
                             listener.onContactSelected(contact);
                             return true;
+
                         case KeyEvent.KEYCODE_DPAD_LEFT:
                             // Move focus back to row
                             itemView.requestFocus();
@@ -170,7 +175,12 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
                     }
                     return false;
                 });
-            }
+            }// In the callButton.setOnKeyListener block, add a focus listener
+            callButton.setOnFocusChangeListener((v, hasFocus) -> {
+                if (!hasFocus) {
+                    callButton.setFocusable(false);
+                }
+            });
         }
 
         // ---------------------------------------------------------------------

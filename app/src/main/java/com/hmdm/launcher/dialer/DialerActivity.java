@@ -59,8 +59,8 @@ public class DialerActivity extends AppCompatActivity
     // -----------------------------------------------------------------------
     // Tab constants
     // -----------------------------------------------------------------------
-    private static final int TAB_ALL      = 1;
-    private static final int TAB_CONTACTS = 0;
+    private static final int TAB_ALL      = 0;
+    private static final int TAB_CONTACTS = 1;
     private static final int TAB_MISSED   = 2;
     private static final int TAB_INCOMING = 3;
     private static final int TAB_OUTGOING = 4;
