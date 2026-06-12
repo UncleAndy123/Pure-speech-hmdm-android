@@ -53,8 +53,7 @@ Licensed under the **Apache 2.0 License**. You may fork, modify, and distribute 
 
 1. Clone this repository
 2. Open the project directory in Android Studio using the default import settings
-3. Let Gradle sync complete — if you are on a corporate network and see SSL errors, see the note above
-4. The project is ready to build
+3. The project is ready to build
 
 ---
 
@@ -74,7 +73,6 @@ Then in the ADB shell:
 dpm set-device-owner com.hmdm.launcher/.AdminReceiver
 ```
 
-> **Emulator tip:** Device Owner mode prevents Android Studio from hot-swapping the APK during development. For fast iteration, keep a snapshot without Device Owner active and restore it between runs. Use the emulator's Extended Controls → Snapshots to manage this.
 >
 > If you need to clear Device Owner to unblock the Run button:
 > ```bash
