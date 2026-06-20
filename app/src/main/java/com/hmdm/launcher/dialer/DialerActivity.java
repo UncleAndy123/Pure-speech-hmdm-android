@@ -482,8 +482,17 @@ public class DialerActivity extends AppCompatActivity
             case KeyEvent.KEYCODE_3: case KeyEvent.KEYCODE_4: case KeyEvent.KEYCODE_5:
             case KeyEvent.KEYCODE_6: case KeyEvent.KEYCODE_7: case KeyEvent.KEYCODE_8:
             case KeyEvent.KEYCODE_9:
+            case KeyEvent.KEYCODE_STAR:
+            case KeyEvent.KEYCODE_POUND:
                 if (currentTab == TAB_CONTACTS) {
-                    String digit = String.valueOf(keyCode - KeyEvent.KEYCODE_0);
+                    String digit;
+                    if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
+                        digit = String.valueOf(keyCode - KeyEvent.KEYCODE_0);
+                    } else if (keyCode == KeyEvent.KEYCODE_STAR) {
+                        digit = "*";
+                    } else {
+                        digit = "#";
+                    }
                     searchField.append(digit);
                     searchField.requestFocus();
                     return true;
