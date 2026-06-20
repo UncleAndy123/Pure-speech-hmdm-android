@@ -27,7 +27,7 @@
  *   - pushIfNeeded() is idempotent — safe to call on every config refresh.
  */
 
-package com.hmdm.launcher.util;
+package com.hmdm.launcher.service;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -54,7 +54,7 @@ public class SmsFilterManager {
 
     // ── Target messaging app ─────────────────────────────────────────────────
     // Change this if you fork DPAD-Messaging under a different package name.
-    private static final String MESSAGING_PACKAGE = "com.dpad.messaging";
+    private static final String MESSAGING_PACKAGE = "com.dpadsms";
 
     // ── Valid mode values ────────────────────────────────────────────────────
     public static final String MODE_OFF        = "off";
@@ -181,9 +181,14 @@ public class SmsFilterManager {
     private String getSetting(String key, String defaultValue) {
         ServerConfig config = SettingsHelper.getInstance(context).getConfig();
         if (config == null) return defaultValue;
-
         List<ApplicationSetting> settings = config.getApplicationSettings();
         if (settings == null) return defaultValue;
+
+        // Temporary diagnostic — remove once confirmed
+        Log.d(TAG, "getApplicationSettings() returned " + settings.size() + " entries:");
+        for (ApplicationSetting s : settings) {
+            Log.d(TAG, "  pkg=" + s.getPackageId() + " name=" + s.getName() + " value=" + s.getValue());
+        }
 
         for (ApplicationSetting s : settings) {
             if (key.equals(s.getName())) {

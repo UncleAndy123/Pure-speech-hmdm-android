@@ -33,6 +33,7 @@ import com.hmdm.launcher.json.ServerConfig;
 import com.hmdm.launcher.pro.worker.DetailedInfoWorker;
 import com.hmdm.launcher.server.ServerServiceKeeper;
 import com.hmdm.launcher.service.PushLongPollingService;
+import com.hmdm.launcher.service.SmsFilterManager;
 import com.hmdm.launcher.task.ConfirmDeviceResetTask;
 import com.hmdm.launcher.task.ConfirmPasswordResetTask;
 import com.hmdm.launcher.task.ConfirmRebootTask;
@@ -942,16 +943,20 @@ public class ConfigUpdater {
         }
     }
 
-    private void lockRestrictions() {
-        if (settingsHelper.getConfig() != null && settingsHelper.getConfig().getRestrictions() != null) {
-            Utils.lockUserRestrictions(context, settingsHelper.getConfig().getRestrictions());
-        }
-        String lockedPackages = settingsHelper.getAppPreference(context.getPackageName(), "locked_packages");
-        Utils.lockPackages(context, lockedPackages, true);
-        String unlockedPackages = settingsHelper.getAppPreference(context.getPackageName(), "unlocked_packages");
-        Utils.lockPackages(context, unlockedPackages, false);
-        notifyThreads();
+private void lockRestrictions() {
+    if (settingsHelper.getConfig() != null && settingsHelper.getConfig().getRestrictions() != null) {
+        Utils.lockUserRestrictions(context, settingsHelper.getConfig().getRestrictions());
     }
+    String lockedPackages = settingsHelper.getAppPreference(context.getPackageName(), "locked_packages");
+    Utils.lockPackages(context, lockedPackages, true);
+    String unlockedPackages = settingsHelper.getAppPreference(context.getPackageName(), "unlocked_packages");
+    Utils.lockPackages(context, unlockedPackages, false);
+
+    // Push SMS/MMS whitelist-blocklist config to the messaging app via Device Owner restrictions.
+    SmsFilterManager.getInstance(context).pushIfNeeded();
+
+    notifyThreads();
+}
 
     private void notifyThreads() {
         ServerConfig config = settingsHelper.getConfig();
