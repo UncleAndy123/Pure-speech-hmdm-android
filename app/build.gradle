@@ -29,7 +29,7 @@ android {
         minSdkVersion 21
         targetSdk 35
         versionCode 15340
-        versionName "6.34"
+        versionName '0.02'
         // Change from "android.support.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -54,6 +54,7 @@ android {
         buildConfigField("Boolean", "DISABLE_ORIENTATION_LOCK", "false")
         buildConfigField("String", "LIBRARY_API_KEY", "\"changeme-8gzk321W\"")
         buildConfigField("Boolean", "USE_ACCESSIBILITY", "false")
+        versionNameSuffix 'Purespeech'
     }
 
     buildTypes {

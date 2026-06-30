@@ -810,8 +810,39 @@ public class MainActivity
 
     private boolean checkAccessibilityService() { return ProUtils.checkAccessibilityService(this); }
 
-    private void createLauncherButtons() { createExitButton(); createInfoButton(); createUpdateButton(); }
+private void createLauncherButtons() { createExitButton(); createInfoButton(); createUpdateButton(); wireSideButtonDpad(); }
 
+
+
+
+
+    // Wire D-Pad up/down navigation between the three side overlay buttons,
+    // and D-Pad LEFT to return focus to the main app grid.
+    // Called once after all three buttons are created by createLauncherButtons().
+    private void wireSideButtonDpad() {
+        if (exitView == null || infoView == null || updateView == null) return;
+
+        // Vertical chain: exit (top) <-> info (middle) <-> update (bottom), wraps at ends
+        exitView.setNextFocusDownId(infoView.getId());
+        exitView.setNextFocusUpId(updateView.getId());
+        infoView.setNextFocusUpId(exitView.getId());
+        infoView.setNextFocusDownId(updateView.getId());
+        updateView.setNextFocusUpId(infoView.getId());
+        updateView.setNextFocusDownId(exitView.getId());
+
+        // D-Pad LEFT from any side button returns focus to the main app grid
+        View.OnKeyListener returnToGridListener = (v, keyCode, event) -> {
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                binding.activityMainContent.requestFocus();
+                return true;
+            }
+            return false;
+        };
+        exitView.setOnKeyListener(returnToGridListener);
+        infoView.setOnKeyListener(returnToGridListener);
+        updateView.setOnKeyListener(returnToGridListener);
+    }
     private void createButtons() {
         ServerConfig config = settingsHelper.getConfig();
         if (ProUtils.kioskModeRequired(this) && !getPackageName().equals(settingsHelper.getConfig().getMainApp())) {
@@ -967,6 +998,10 @@ public class MainActivity
         ImageView manageButton = new ImageView(this);
         manageButton.setImageResource(isDarkBackground() ? imageResource : imageResourceBlack);
         view.addView(manageButton);
+        // Make the button reachable and activatable by D-Pad
+        manageButton.setFocusable(true);
+        manageButton.setFocusableInTouchMode(false);
+        manageButton.setId(View.generateViewId());
         selectedManageButtonBorder.setColor(0);
         selectedManageButtonBorder.setStroke(2, isDarkBackground() ? 0xa0ffffff : 0xa0000000);
         manageButton.setOnFocusChangeListener((v, hasFocus) -> v.setBackground(hasFocus ? selectedManageButtonBorder : null));
