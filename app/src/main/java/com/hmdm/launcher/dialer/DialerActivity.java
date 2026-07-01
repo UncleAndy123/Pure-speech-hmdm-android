@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
@@ -45,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hmdm.launcher.R;
 import com.hmdm.launcher.util.CallWhitelistManager;
+import com.hmdm.launcher.service.HmdmInCallService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -469,8 +471,23 @@ public class DialerActivity extends AppCompatActivity
     // Hardware keys
     // =========================================================================
 
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_ENDCALL) {
+            // API 23+ required for android.telecom.Call
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                android.telecom.Call activeCall = HmdmInCallService.getCurrentCall();
+                if (activeCall != null) {
+                    Intent intent = new Intent(this, InCallActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    return true;
+                }
+            }
+            finish();
+            return true;
+        }
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
                 finish();

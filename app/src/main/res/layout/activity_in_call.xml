@@ -4,16 +4,19 @@
     Controls row: MUTE | KEYPAD | SPEAKER
     Dialpad grid: hidden by default, shown when KEYPAD toggled.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="HardcodedText,SmallSp"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:background="#F5F5F7"
-    android:padding="16dp">
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="#F5F5F7"
+        android:padding="16dp">
 
     <!-- Status: Calling... / Connected -->
     <TextView
@@ -198,5 +201,6 @@
         android:backgroundTint="#FF3B30"
         android:focusable="true"
         android:nextFocusUp="@+id/incall_mute" />
+    </LinearLayout>
 
-</LinearLayout>
+</ScrollView>
