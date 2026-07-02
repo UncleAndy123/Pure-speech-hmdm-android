@@ -77,6 +77,7 @@ import com.hmdm.launcher.AdminReceiver;
 import com.hmdm.launcher.BuildConfig;
 import com.hmdm.launcher.Const;
 import com.hmdm.launcher.R;
+import com.hmdm.launcher.dialer.CallKeyRouter;
 import com.hmdm.launcher.dialer.DialerActivity;
 import com.hmdm.launcher.databinding.ActivityMainBinding;
 import com.hmdm.launcher.databinding.DialogAccessibilityServiceBinding;
@@ -512,21 +513,15 @@ public class MainActivity
     // =========================================================================
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mainAppListAdapter != null && event.getAction() == KeyEvent.ACTION_UP) {
-            if (!mainAppListAdapter.onKey(keyCode)) {
-                if (bottomAppListAdapter != null) return bottomAppListAdapter.onKey(keyCode);
-            }
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (CallKeyRouter.handleKeyDown(this, keyCode, event)) {
+            return true;
+        }
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENDCALL:
-                lockScreen();
-                return true;
+                // No active call — don't consume ACTION_DOWN, so a long-press
+                // can still reach the system power-off dialog.
+                return super.onKeyDown(keyCode, event);
             case KeyEvent.KEYCODE_CALL:
                 openDialer(null);
                 return true;
@@ -542,6 +537,22 @@ public class MainActivity
                 return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_ENDCALL && !event.isCanceled()) {
+            // Only reached if there was no active call (router would have
+            // intercepted onKeyDown otherwise) and this wasn't a long-press.
+            lockScreen();
+            return true;
+        }
+        if (mainAppListAdapter != null && event.getAction() == KeyEvent.ACTION_UP) {
+            if (!mainAppListAdapter.onKey(keyCode)) {
+                if (bottomAppListAdapter != null) return bottomAppListAdapter.onKey(keyCode);
+            }
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     // =========================================================================
