@@ -8,3 +8,4 @@
 .externalNativeBuild
 example/
 app/release
+/app/opensource/release/baselineProfiles/1/app-opensource-release.dm
