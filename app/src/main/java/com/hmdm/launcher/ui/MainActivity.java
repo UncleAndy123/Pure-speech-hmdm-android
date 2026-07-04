@@ -1423,7 +1423,33 @@ private void createLauncherButtons() { createExitButton(); createInfoButton(); c
         administratorModeDialog.setCancelable(false); administratorModeDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         administratorModeDialog.setContentView(dialogAdministratorModeBinding.getRoot()); administratorModeDialog.show();
     }
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN
+                && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT
+                && redirectToSideButtonsIfAtGridEdge()) {
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    }
 
+    private boolean redirectToSideButtonsIfAtGridEdge() {
+        if (exitView == null || mainAppListAdapter == null || spanCount <= 0) return false;
+        View focused = getCurrentFocus();
+        if (focused == null) return false;
+        View itemView = binding.activityMainContent.findContainingItemView(focused);
+        if (itemView == null) return false;
+        int pos = binding.activityMainContent.getChildAdapterPosition(itemView);
+        if (pos < 0) return false;
+        int col = pos % spanCount;
+        int totalItems = mainAppListAdapter.getItemCount();
+        // Right edge = last column OR last item in an incomplete row
+        if (col == spanCount - 1 || pos == totalItems - 1) {
+            exitView.requestFocus();
+            return true;
+        }
+        return false;
+    }
     public void skipAdminMode(View view) { dismissDialog(administratorModeDialog); RemoteLogger.log(this, Const.LOG_INFO, "Manually skipped the device admin permissions setup"); preferences.edit().putInt(Const.PREFERENCES_ADMINISTRATOR, Const.PREFERENCES_OFF).commit(); checkAndStartLauncher(); }
     public void setAdminMode(View view) { dismissDialog(administratorModeDialog); startActivity(new Intent(MainActivity.this, AdminModeRequestActivity.class)); }
 
