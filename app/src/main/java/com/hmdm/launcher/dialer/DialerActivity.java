@@ -60,11 +60,12 @@ public class DialerActivity extends AppCompatActivity
     // -----------------------------------------------------------------------
     private static final int TAB_ALL      = 0;
     private static final int TAB_CONTACTS = 1;
-    private static final int TAB_MISSED   = 2;
+    public static final int TAB_MISSED   = 2;
     private static final int TAB_INCOMING = 3;
     private static final int TAB_OUTGOING = 4;
 
     private int currentTab = TAB_CONTACTS;
+    public static final String EXTRA_OPEN_TAB = "open_tab";
 
     // -----------------------------------------------------------------------
     // Views — contacts section
@@ -221,6 +222,11 @@ for (int i = 0; i < tabButtons.length; i++) {
         // ---- Initial state ---- This is what the dialer will open up to.
         switchTab(TAB_CONTACTS);
         loadContacts();
+        int requestedTab = getIntent().getIntExtra(EXTRA_OPEN_TAB, -1);
+        if (requestedTab != -1) {
+            switchTab(requestedTab);
+        }
+
     }
 
     @Override
