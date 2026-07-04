@@ -18,7 +18,10 @@ import com.hmdm.launcher.service.HmdmInCallService;
 public class CallKeyRouter {
 
 public static boolean handleKeyDown(Activity activity, int keyCode, KeyEvent event) {
-    if (keyCode != KeyEvent.KEYCODE_CALL && keyCode != KeyEvent.KEYCODE_ENDCALL) {
+    if (keyCode != KeyEvent.KEYCODE_CALL &&
+            keyCode != KeyEvent.KEYCODE_ENDCALL &&
+            keyCode != KeyEvent.KEYCODE_CLEAR &&
+            keyCode != KeyEvent.KEYCODE_POWER) {
         return false;
     }
 
@@ -32,6 +35,16 @@ public static boolean handleKeyDown(Activity activity, int keyCode, KeyEvent eve
     if (activity instanceof InCallActivity) {
         return false;
     }
+
+    // If the user pressed ENDCALL or POWER during a call, hang up 
+    // immediately rather than just switching to the in-call screen.
+    if (keyCode == KeyEvent.KEYCODE_ENDCALL ||
+            keyCode == KeyEvent.KEYCODE_CLEAR ||
+            keyCode == KeyEvent.KEYCODE_POWER) {
+        activeCall.disconnect();
+        return true;
+    }
+
 
     String number = (activeCall.getDetails().getHandle() != null)
             ? activeCall.getDetails().getHandle().getSchemeSpecificPart()
