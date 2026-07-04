@@ -19,15 +19,15 @@
         android:padding="16dp">
 
     <!-- Status: Calling... / Connected -->
-    <TextView
-        android:id="@+id/incall_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Calling..."
-        android:textColor="#007AFF"
-        android:textStyle="bold"
-        android:textSize="12sp"
-        android:layout_marginTop="10dp" />
+        <TextView
+            android:id="@+id/incall_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Calling..."
+            android:textColor="#2962FF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
     <!-- Call timer -->
     <TextView
@@ -132,10 +132,10 @@
     </LinearLayout>
 
     <!-- Spacer — pushes controls to bottom -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
     <!-- ============================================================ -->
     <!-- CONTROLS ROW: MUTE | KEYPAD | SPEAKER                        -->
@@ -150,43 +150,43 @@
             android:id="@+id/incall_mute"
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:layout_weight="1"
             android:layout_marginRight="4dp"
-            android:text="MUTE"
-            android:textSize="11sp"
-            android:textColor="@color/history_text_selector"
+            android:layout_weight="1"
             android:background="@drawable/modern_button_selector"
             android:focusable="true"
             android:nextFocusRight="@+id/incall_keypad"
-            android:nextFocusDown="@+id/incall_hangup" />
+            android:nextFocusDown="@+id/incall_hangup"
+            android:text="MUTE"
+            android:textColor="#2962FF"
+            android:textSize="11sp" />
 
         <Button
             android:id="@+id/incall_keypad"
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:layout_weight="1"
             android:layout_marginRight="4dp"
-            android:text="KEYPAD"
-            android:textSize="11sp"
-            android:textColor="@color/history_text_selector"
+            android:layout_weight="1"
             android:background="@drawable/modern_button_selector"
             android:focusable="true"
             android:nextFocusLeft="@+id/incall_mute"
             android:nextFocusRight="@+id/incall_speaker"
-            android:nextFocusDown="@+id/incall_hangup" />
+            android:nextFocusDown="@+id/incall_hangup"
+            android:text="KEYPAD"
+            android:textColor="#2962FF"
+            android:textSize="11sp" />
 
         <Button
             android:id="@+id/incall_speaker"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="SPEAKER"
-            android:textSize="11sp"
-            android:textColor="@color/history_text_selector"
             android:background="@drawable/modern_button_selector"
             android:focusable="true"
             android:nextFocusLeft="@+id/incall_keypad"
-            android:nextFocusDown="@+id/incall_hangup" />
+            android:nextFocusDown="@+id/incall_hangup"
+            android:text="SPEAKER"
+            android:textColor="#2962FF"
+            android:textSize="11sp" />
 
     </LinearLayout>
 

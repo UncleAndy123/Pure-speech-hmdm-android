@@ -75,6 +75,11 @@ public class DialerActivity extends AppCompatActivity
     private Button        dialButton;
     private List<ContactItem> allContacts = new ArrayList<>();
 
+
+    private boolean historyLoaded = false;
+    private View contactsSection;
+    private View historySection;
+
     // -----------------------------------------------------------------------
     // Views — history section
     // -----------------------------------------------------------------------
@@ -122,27 +127,36 @@ public class DialerActivity extends AppCompatActivity
         tabOutgoing.setOnClickListener(v -> switchTab(TAB_OUTGOING));
 
         // D-pad left/right cycles tabs
-        for (int i = 0; i < tabButtons.length; i++) {
-            final int idx = i;
-            tabButtons[i].setOnKeyListener((v, keyCode, event) -> {
-                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-                if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && idx < tabButtons.length - 1) {
-                    switchTab(idx + 1);
-                    tabButtons[idx + 1].requestFocus();
-                    return true;
-                }
-                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && idx > 0) {
-                    switchTab(idx - 1);
-                    tabButtons[idx - 1].requestFocus();
-                    return true;
-                }
-                if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER) {
-                    switchTab(idx);
-                    return true;
-                }
-                return false;
-            });
+for (int i = 0; i < tabButtons.length; i++) {
+    final int idx = i;
+    tabButtons[i].setOnKeyListener((v, keyCode, event) -> {
+        if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+        if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && idx < tabButtons.length - 1) {
+            switchTab(idx + 1);
+            tabButtons[idx + 1].requestFocus();
+            return true;
         }
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && idx > 0) {
+            switchTab(idx - 1);
+            tabButtons[idx - 1].requestFocus();
+            return true;
+        }
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER) {
+            switchTab(idx);
+            return true;
+        }
+        if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+            // Route into whichever section is actually visible for the current tab
+            if (currentTab == TAB_CONTACTS) {
+                searchField.requestFocus();
+            } else {
+                historyList.requestFocus();
+            }
+            return true;
+        }
+        return false;
+    });
+}
 
         // ---- Contacts section ----
         searchField   = findViewById(R.id.dialer_search);
@@ -164,6 +178,16 @@ public class DialerActivity extends AppCompatActivity
                 filterContacts(query);
             }
         });
+
+        //Added setOnKeyListener for explicit up navigation.
+        searchField.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                tabButtons[currentTab].requestFocus();
+                return true;
+            }
+            return false;
+        });
+
 
         searchField.setOnEditorActionListener((v, actionId, event) -> {
             if (event != null &&
@@ -192,6 +216,8 @@ public class DialerActivity extends AppCompatActivity
         historyList.setLayoutManager(new LinearLayoutManager(this));
         historyList.setAdapter(historyAdapter);
 
+        contactsSection = findViewById(R.id.dialer_contacts_section);
+        historySection  = findViewById(R.id.dialer_history_section);
         // ---- Initial state ---- This is what the dialer will open up to.
         switchTab(TAB_CONTACTS);
         loadContacts();
@@ -200,30 +226,35 @@ public class DialerActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh history on return from a call
-        if (currentTab != TAB_CONTACTS) loadHistory();
+        // Refresh history on return from a call, force a complete reload, not cache reload.
+        if (currentTab != TAB_CONTACTS) {
+            historyLoaded = false;
+            loadHistory();
+        }
     }
 
     // =========================================================================
     // Tab switching
     // =========================================================================
 
-    private void switchTab(int tab) {
-        currentTab = tab;
-        updateTabStyles();
+private void switchTab(int tab) {
+    currentTab = tab;
+    updateTabStyles();
 
-        View contactsSection = findViewById(R.id.dialer_contacts_section);
-        View historySection  = findViewById(R.id.dialer_history_section);
-
-        if (tab == TAB_CONTACTS) {
-            contactsSection.setVisibility(View.VISIBLE);
-            historySection.setVisibility(View.GONE);
+    if (tab == TAB_CONTACTS) {
+        contactsSection.setVisibility(View.VISIBLE);
+        historySection.setVisibility(View.GONE);
+    } else {
+        contactsSection.setVisibility(View.GONE);
+        historySection.setVisibility(View.VISIBLE);
+        if (historyLoaded) {
+            // Already have the data cached — just re-filter, no CallLog query needed
+            applyHistoryFilter();
         } else {
-            contactsSection.setVisibility(View.GONE);
-            historySection.setVisibility(View.VISIBLE);
             loadHistory();
         }
     }
+}
 
     private void updateTabStyles() {
         int active   = android.graphics.Color.parseColor("#1565C0");
@@ -359,6 +390,7 @@ public class DialerActivity extends AppCompatActivity
                 cursor.close();
             }
             allHistoryItems = loaded;
+            historyLoaded = true;
             runOnUiThread(this::applyHistoryFilter);
         });
     }
