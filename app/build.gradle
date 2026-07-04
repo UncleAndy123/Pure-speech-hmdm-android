@@ -26,7 +26,7 @@ android {
 
     defaultConfig {
         applicationId "com.hmdm.launcher"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdk 35
         versionCode 15340
         versionName '0.02'

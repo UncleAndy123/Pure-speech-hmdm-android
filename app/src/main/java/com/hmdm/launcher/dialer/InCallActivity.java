@@ -101,6 +101,21 @@ public class InCallActivity extends AppCompatActivity {
             transitionToConnected();
         }
     };
+    // -------------------------------------------------------------------------
+// Broadcast receiver — authoritative call-ended signal from the service.
+// This is the reliable teardown path: onCallRemoved() at the service level
+// always fires regardless of how the call ended (remote hangup, Bluetooth/
+// headset action, etc.), unlike the per-call Call.Callback below, which
+// some OEM telephony stacks don't reliably deliver STATE_DISCONNECTED to.
+// -------------------------------------------------------------------------
+    private final BroadcastReceiver callEndedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Received ACTION_CALL_ENDED — finishing InCallActivity");
+            finish();
+        }
+    };
+
 
     // -------------------------------------------------------------------------
     // Call state callback — handles remote hang-up etc.
@@ -353,22 +368,26 @@ public class InCallActivity extends AppCompatActivity {
     // Lifecycle
     // =========================================================================
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        IntentFilter filter = new IntentFilter(HmdmInCallService.ACTION_CALL_CONNECTED);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(connectedReceiver, filter, RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(connectedReceiver, filter);
-        }
+@Override
+protected void onResume() {
+    super.onResume();
+    IntentFilter connectedFilter = new IntentFilter(HmdmInCallService.ACTION_CALL_CONNECTED);
+    IntentFilter endedFilter = new IntentFilter(HmdmInCallService.ACTION_CALL_ENDED);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        registerReceiver(connectedReceiver, connectedFilter, RECEIVER_NOT_EXPORTED);
+        registerReceiver(callEndedReceiver, endedFilter, RECEIVER_NOT_EXPORTED);
+    } else {
+        registerReceiver(connectedReceiver, connectedFilter);
+        registerReceiver(callEndedReceiver, endedFilter);
     }
+}
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        try { unregisterReceiver(connectedReceiver); } catch (Exception e) { /* already unregistered */ }
-    }
+@Override
+protected void onPause() {
+    super.onPause();
+    try { unregisterReceiver(connectedReceiver); } catch (Exception e) { /* already unregistered */ }
+    try { unregisterReceiver(callEndedReceiver); } catch (Exception e) { /* already unregistered */ }
+}
 
     @Override
     protected void onDestroy() {

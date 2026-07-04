@@ -88,7 +88,7 @@ public class IncomingCallActivity extends AppCompatActivity {
         numberView.setText(callerNumber);
 
         // -------------------------------------------------------------------------
-        // Secondary whitelist check — defence in depth.
+        // Secondary whitelist check — defense in depth.
         // HmdmInCallService already checked before launching this Activity,
         // but we check again here in case config was updated in the gap,
         // or in case the Activity is somehow started via another path.
