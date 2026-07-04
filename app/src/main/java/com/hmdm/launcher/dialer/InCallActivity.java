@@ -324,6 +324,7 @@ public class InCallActivity extends AppCompatActivity {
         }
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_POWER:
                 hangUp();
                 return true;
             case KeyEvent.KEYCODE_BACK:

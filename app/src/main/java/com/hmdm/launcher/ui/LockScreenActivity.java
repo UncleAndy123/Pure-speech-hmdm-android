@@ -42,6 +42,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.hmdm.launcher.R;
+import com.hmdm.launcher.dialer.CallKeyRouter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -193,6 +194,9 @@ public class LockScreenActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (CallKeyRouter.handleKeyDown(this, keyCode, event)) {
+            return true;
+        }
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:

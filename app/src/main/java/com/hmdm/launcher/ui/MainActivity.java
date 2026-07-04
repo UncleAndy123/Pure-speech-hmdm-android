@@ -519,6 +519,7 @@ public class MainActivity
         }
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_POWER:
                 // No active call — don't consume ACTION_DOWN, so a long-press
                 // can still reach the system power-off dialog.
                 return super.onKeyDown(keyCode, event);
@@ -541,7 +542,8 @@ public class MainActivity
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_ENDCALL && !event.isCanceled()) {
+        if ((keyCode == KeyEvent.KEYCODE_ENDCALL || keyCode == KeyEvent.KEYCODE_POWER) 
+                && !event.isCanceled()) {
             // Only reached if there was no active call (router would have
             // intercepted onKeyDown otherwise) and this wasn't a long-press.
             lockScreen();

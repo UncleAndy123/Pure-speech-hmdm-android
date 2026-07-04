@@ -89,8 +89,8 @@ public class ConfirmCallActivity extends AppCompatActivity {
             placeCall(getIntent().getStringExtra("number"));
             return true;
         }
-        // Red end key = cancel
-        if (keyCode == KeyEvent.KEYCODE_ENDCALL) {
+        // Red end key / Power = cancel
+        if (keyCode == KeyEvent.KEYCODE_ENDCALL || keyCode == KeyEvent.KEYCODE_POWER) {
             finish();
             return true;
         }

@@ -514,6 +514,7 @@ private void switchTab(int tab) {
         }
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_POWER:
                 // No active call (router would have intercepted otherwise) — just close dialer.
                 finish();
                 return true;

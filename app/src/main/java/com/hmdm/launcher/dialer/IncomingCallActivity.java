@@ -182,6 +182,7 @@ public class IncomingCallActivity extends AppCompatActivity {
                 return true;
 
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_POWER:
                 // Red end key — reject
                 rejectCall();
                 finish();
