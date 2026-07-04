@@ -29,7 +29,7 @@ android {
         minSdkVersion 23
         targetSdk 35
         versionCode 15340
-        versionName '0.02'
+        versionName '0.02.1'
         // Change from "android.support.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
