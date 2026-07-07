@@ -56,7 +56,20 @@ public static boolean handleKeyDown(Activity activity, int keyCode, KeyEvent eve
     intent.putExtra(InCallActivity.EXTRA_CALLER_NAME, number);   // name resolution not critical here — number is enough
     intent.putExtra(InCallActivity.EXTRA_CALLER_NUMBER, number);
     intent.putExtra(InCallActivity.EXTRA_IS_CONNECTED, isActive);
-    activity.startActivity(intent);
+    routeToInCall(activity, activeCall);
     return true;
 }
+
+    /** Called from onBackPressed() in activities that are not InCallActivity. */
+    public static void routeToInCall(Activity activity, Call activeCall) {
+        String number = (activeCall.getDetails().getHandle() != null)
+                ? activeCall.getDetails().getHandle().getSchemeSpecificPart() : "";
+        boolean isActive = activeCall.getState() == Call.STATE_ACTIVE;
+        Intent intent = new Intent(activity, InCallActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(InCallActivity.EXTRA_CALLER_NAME, number);
+        intent.putExtra(InCallActivity.EXTRA_CALLER_NUMBER, number);
+        intent.putExtra(InCallActivity.EXTRA_IS_CONNECTED, isActive);
+        activity.startActivity(intent);
+    }
 }

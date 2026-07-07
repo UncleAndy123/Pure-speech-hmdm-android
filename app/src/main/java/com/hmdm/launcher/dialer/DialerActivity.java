@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.telecom.Call;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -43,6 +44,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hmdm.launcher.R;
+import com.hmdm.launcher.service.HmdmInCallService;
 import com.hmdm.launcher.util.CallWhitelistManager;
 
 import java.text.SimpleDateFormat;
@@ -506,7 +508,17 @@ private void switchTab(int tab) {
     // Hardware keys
     // =========================================================================
 
-
+    @Override
+    public void onBackPressed() {
+        // If a call is active, END key (KEYCODE_BACK) should surface InCallActivity,
+        // not navigate back through the launcher.
+        Call activeCall = HmdmInCallService.getCurrentCall();
+        if (activeCall != null) {
+            CallKeyRouter.routeToInCall(this, activeCall);
+            return;
+        }
+        super.onBackPressed();
+    }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (CallKeyRouter.handleKeyDown(this, keyCode, event)) {
