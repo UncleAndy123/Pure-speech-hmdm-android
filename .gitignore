@@ -9,3 +9,5 @@
 example/
 app/release
 /app/opensource/release/baselineProfiles/1/app-opensource-release.dm
+/app/opensource/release/output-metadata.json
+/app/opensource/release/baselineProfiles/0/app-opensource-release.dm
