@@ -51,6 +51,8 @@
             <Button
                 android:id="@+id/tab_all"
                 style="?android:attr/buttonBarButtonStyle"
+                android:nextFocusLeft="@+id/tab_all"
+                android:nextFocusRight="@+id/tab_contacts"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
@@ -68,6 +70,8 @@
             <Button
                 android:id="@+id/tab_contacts"
                 style="?android:attr/buttonBarButtonStyle"
+                android:nextFocusLeft="@+id/tab_all"
+                android:nextFocusRight="@+id/tab_missed"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
@@ -85,6 +89,8 @@
             <Button
                 android:id="@+id/tab_missed"
                 style="?android:attr/buttonBarButtonStyle"
+                android:nextFocusLeft="@+id/tab_contacts"
+                android:nextFocusRight="@+id/tab_incoming"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
@@ -101,6 +107,8 @@
             <Button
                 android:id="@+id/tab_incoming"
                 style="?android:attr/buttonBarButtonStyle"
+                android:nextFocusLeft="@+id/tab_missed"
+                android:nextFocusRight="@+id/tab_outgoing"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_marginEnd="2dp"
@@ -118,6 +126,8 @@
             <Button
                 android:id="@+id/tab_outgoing"
                 style="?android:attr/buttonBarButtonStyle"
+                android:nextFocusLeft="@+id/tab_incoming"
+                android:nextFocusRight="@+id/tab_outgoing"
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"

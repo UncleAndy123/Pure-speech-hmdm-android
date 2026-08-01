@@ -228,11 +228,15 @@ for (int i = 0; i < tabButtons.length; i++) {
         historySection  = findViewById(R.id.dialer_history_section);
         // ---- Initial state ---- This is what the dialer will open up to.
         switchTab(TAB_CONTACTS);
+        tabContacts.post(tabContacts::requestFocus);   // land focus on the active tab at startup
         loadContacts();
         int requestedTab = getIntent().getIntExtra(EXTRA_OPEN_TAB, -1);
+        final Button focusTarget = (requestedTab != -1) ? tabButtons[requestedTab] : tabContacts;
         if (requestedTab != -1) {
             switchTab(requestedTab);
         }
+        focusTarget.post(focusTarget::requestFocus);
+
 
     }
 

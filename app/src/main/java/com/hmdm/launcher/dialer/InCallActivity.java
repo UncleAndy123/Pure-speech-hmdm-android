@@ -341,6 +341,9 @@ public class InCallActivity extends AppCompatActivity {
             }
         }
         switch (keyCode) {
+            case KeyEvent.KEYCODE_F3:
+                toggleSpeaker();
+                return true;
             case KeyEvent.KEYCODE_ENDCALL:
             case KeyEvent.KEYCODE_CLEAR:
                 case KeyEvent.KEYCODE_POWER:
