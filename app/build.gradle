@@ -54,7 +54,7 @@ android {
         buildConfigField("Boolean", "DISABLE_ORIENTATION_LOCK", "false")
         buildConfigField("String", "LIBRARY_API_KEY", "\"changeme-8gzk321W\"")
         buildConfigField("Boolean", "USE_ACCESSIBILITY", "false")
-        versionNameSuffix 'Purespeech'
+        versionNameSuffix 'PurespeechA'
     }
 
     buildTypes {

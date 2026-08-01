@@ -307,7 +307,19 @@ public class InCallActivity extends AppCompatActivity {
             hangupBtn.requestFocus();
         }
     }
-
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        // The physical END key on this Kyocera maps to KEYCODE_HOME at the Android
+        // level — it cannot be caught in onKeyDown(). onUserLeaveHint() fires when
+        // the user navigates away via hardware key. On this kiosk device, leaving
+        // InCallActivity while a call is active always means the user wants to hang up.
+        Call call = HmdmInCallService.getCurrentCall();
+        if (call != null) {
+            Log.d(TAG, "onUserLeaveHint — disconnecting call via END/HOME key");
+            call.disconnect();
+        }
+    }
     // =========================================================================
     // Hardware keys — send DTMF for number keys when dialpad is open
     // =========================================================================

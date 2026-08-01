@@ -73,9 +73,10 @@ public class HmdmInCallService extends InCallService {
         final String resolvedName = resolveCallerName(resolvedNumber);
 
         if (state == Call.STATE_RINGING) {
-            // ---- INCOMING call — enforce whitelist ----
-            handleIncomingCall(call, resolvedNumber, resolvedName);
-
+            boolean allowed = handleIncomingCall(call, resolvedNumber, resolvedName);
+            if (!allowed) {
+                return; // Blocked call already rejected — don't register callback or treat as missed
+            }
         } else if (state == Call.STATE_DIALING ||
                 state == Call.STATE_CONNECTING ||
                 state == Call.STATE_NEW) {
@@ -173,28 +174,29 @@ public class HmdmInCallService extends InCallService {
         startActivity(intent);
     }
 
-    private void handleIncomingCall(Call call, String number, String callerName) {
-        Log.d(TAG, "Incoming call from: [" + number + "]");
+private boolean handleIncomingCall(Call call, String number, String callerName) {
+    Log.d(TAG, "Incoming call from: [" + number + "]");
 
-        boolean allowed = CallWhitelistManager.getInstance(this).isAllowed(number);
+    boolean allowed = CallWhitelistManager.getInstance(this).isAllowed(number);
 
-        if (!allowed) {
-            Log.d(TAG, "BLOCKING call from: " + number);
-            call.reject(false, null);
-            currentCall = null;
-            return;
-        }
-
-        Log.d(TAG, "ALLOWING call from: " + number);
-
-        Intent intent = new Intent(this, IncomingCallActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra(IncomingCallActivity.EXTRA_CALLER_NAME,   callerName);
-        intent.putExtra(IncomingCallActivity.EXTRA_CALLER_NUMBER, number);
-        startActivity(intent);
+    if (!allowed) {
+        Log.d(TAG, "BLOCKING call from: " + number);
+        call.reject(false, null);
+        currentCall = null;
+        return false;
     }
+
+    Log.d(TAG, "ALLOWING call from: " + number);
+
+    Intent intent = new Intent(this, IncomingCallActivity.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+            Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+    intent.putExtra(IncomingCallActivity.EXTRA_CALLER_NAME,   callerName);
+    intent.putExtra(IncomingCallActivity.EXTRA_CALLER_NUMBER, number);
+    startActivity(intent);
+    return true;
+}
 
     private String resolveCallerName(String number) {
         if (number == null || number.isEmpty()) return "Unknown";

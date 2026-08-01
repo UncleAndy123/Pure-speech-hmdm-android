@@ -155,6 +155,12 @@ public class IncomingCallActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         try { unregisterReceiver(callEndedReceiver); } catch (Exception e) { /* already gone */ }
+        // If call is no longer ringing when we lose focus, we're stale — finish.
+        // Handles the case where STATE_ACTIVE fired before answerCall() could call finish().
+        Call call = HmdmInCallService.getCurrentCall();
+        if (call == null || call.getState() != Call.STATE_RINGING) {
+            finish();
+        }
     }
     @Override
     protected void onDestroy() {
