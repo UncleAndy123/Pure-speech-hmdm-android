@@ -370,13 +370,14 @@ public class InCallActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (dialpadVisible) {
-            char tone = keyCodeToTone(keyCode);
-            if (tone != 0) {
-                stopDtmf();
-                appendDialedDigit(tone);
-                return true;
+        // A digit/star/pound press auto-opens the dialpad, then sends the tone.
+        char tone = keyCodeToTone(keyCode);
+        if (tone != 0) {
+            if (!dialpadVisible) {
+                toggleDialpad();   // open the pad on first digit
             }
+            sendDtmf(tone);
+            return true;
         }
         return super.onKeyUp(keyCode, event);
     }
