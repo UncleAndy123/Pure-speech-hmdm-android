@@ -50,8 +50,10 @@ import com.hmdm.launcher.util.CallWhitelistManager;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class DialerActivity extends AppCompatActivity
         implements ContactsAdapter.OnContactSelectedListener,
@@ -109,6 +111,9 @@ public class DialerActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(
+                android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         setContentView(R.layout.activity_dialer);
 
         // ---- Tab buttons ----
@@ -353,55 +358,90 @@ private void switchTab(int tab) {
     // Call history
     // =========================================================================
 
-    private void loadHistory() {
+private void loadHistory() {
+    if (ActivityCompat.checkSelfPermission(this,
+            Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_CALL_LOG}, 2);
+        return;
+    }
+    AsyncTask.execute(() -> {
+        long t0 = System.currentTimeMillis();
+
+        // Build a normalized number -> name map from contacts ONCE, so
+        // history rows resolve in memory instead of firing a PhoneLookup
+        // query per row (the old per-row lookupContactName path).
+        Map<String, String> contactNames = new HashMap<>();
+        CallWhitelistManager wm = CallWhitelistManager.getInstance(this);
         if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_CALL_LOG}, 2);
-            return;
-        }
-        AsyncTask.execute(() -> {
-            List<CallHistoryItem> loaded = new ArrayList<>();
-            Cursor cursor = getContentResolver().query(
-                    CallLog.Calls.CONTENT_URI,
+                Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+            Cursor cc = getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     new String[]{
-                            CallLog.Calls.CACHED_NAME,
-                            CallLog.Calls.NUMBER,
-                            CallLog.Calls.TYPE,
-                            CallLog.Calls.DATE,
-                            CallLog.Calls.DURATION
+                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                            ContactsContract.CommonDataKinds.Phone.NUMBER
                     },
-                    null, null,
-                    CallLog.Calls.DATE + " DESC");
-
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    String name     = cursor.getString(0);
-                    String number   = cursor.getString(1);
-                    if (name == null || name.isEmpty()) name = lookupContactName(number);
-                    int    type     = cursor.getInt(2);
-                    long   date     = cursor.getLong(3);
-                    long   duration = cursor.getLong(4);
-
-                    if (type == CallLog.Calls.INCOMING_TYPE ||
-                            type == CallLog.Calls.OUTGOING_TYPE ||
-                            type == CallLog.Calls.MISSED_TYPE) {
-                        int mapped;
-                        switch (type) {
-                            case CallLog.Calls.INCOMING_TYPE: mapped = CallHistoryItem.TYPE_INCOMING; break;
-                            case CallLog.Calls.OUTGOING_TYPE: mapped = CallHistoryItem.TYPE_OUTGOING; break;
-                            default:                           mapped = CallHistoryItem.TYPE_MISSED;   break;
-                        }
-                        loaded.add(new CallHistoryItem(name, number, mapped, date, duration));
+                    null, null, null);
+            if (cc != null) {
+                while (cc.moveToNext()) {
+                    String cName   = cc.getString(0);
+                    String cNumber = cc.getString(1);
+                    if (cName != null && cNumber != null) {
+                        contactNames.put(wm.normalize(cNumber), cName);
                     }
                 }
-                cursor.close();
+                cc.close();
             }
-            allHistoryItems = loaded;
-            historyLoaded = true;
-            runOnUiThread(this::applyHistoryFilter);
-        });
-    }
+        }
+
+        List<CallHistoryItem> loaded = new ArrayList<>();
+        Cursor cursor = getContentResolver().query(
+                CallLog.Calls.CONTENT_URI,
+                new String[]{
+                        CallLog.Calls.CACHED_NAME,
+                        CallLog.Calls.NUMBER,
+                        CallLog.Calls.TYPE,
+                        CallLog.Calls.DATE,
+                        CallLog.Calls.DURATION
+                },
+                null, null,
+                CallLog.Calls.DATE + " DESC");
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String name     = cursor.getString(0);
+                String number   = cursor.getString(1);
+                // Missing cached name -> resolve from the in-memory map;
+                // fall back to the raw number.
+                if (name == null || name.isEmpty()) {
+                    String match = contactNames.get(wm.normalize(number));
+                    name = (match != null) ? match : number;
+                }
+                int    type     = cursor.getInt(2);
+                long   date     = cursor.getLong(3);
+                long   duration = cursor.getLong(4);
+
+                if (type == CallLog.Calls.INCOMING_TYPE ||
+                        type == CallLog.Calls.OUTGOING_TYPE ||
+                        type == CallLog.Calls.MISSED_TYPE) {
+                    int mapped;
+                    switch (type) {
+                        case CallLog.Calls.INCOMING_TYPE: mapped = CallHistoryItem.TYPE_INCOMING; break;
+                        case CallLog.Calls.OUTGOING_TYPE: mapped = CallHistoryItem.TYPE_OUTGOING; break;
+                        default:                           mapped = CallHistoryItem.TYPE_MISSED;   break;
+                    }
+                    loaded.add(new CallHistoryItem(name, number, mapped, date, duration));
+                }
+            }
+            cursor.close();
+        }
+        android.util.Log.d("DialerActivity",
+                "history bg total: " + (System.currentTimeMillis() - t0) + "ms, rows=" + loaded.size());
+        allHistoryItems = loaded;
+        historyLoaded = true;
+        runOnUiThread(this::applyHistoryFilter);
+    });
+}
 
     private void applyHistoryFilter() {
         int filter;

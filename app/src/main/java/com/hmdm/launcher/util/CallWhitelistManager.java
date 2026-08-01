@@ -37,7 +37,8 @@ public class CallWhitelistManager {
 
     private static CallWhitelistManager instance;
     private final Context context;
-
+    private volatile Set<String> cachedNumbers;
+    private volatile String cachedCsv;
     private CallWhitelistManager(Context context) {
         this.context = context.getApplicationContext();
     }
@@ -56,42 +57,49 @@ public class CallWhitelistManager {
      *
      * @return set of normalized allowed numbers
      */
-    public Set<String> getAllowedNumbers() {
-        ServerConfig config = SettingsHelper.getInstance(context).getConfig();
-        if (config == null) {
-            Log.w(TAG, "No MDM config loaded yet — whitelist empty");
-            return Collections.emptySet();
-        }
-
-        List<ApplicationSetting> settings = config.getApplicationSettings();
-        if (settings == null) {
-            return Collections.emptySet();
-        }
-
-        for (ApplicationSetting setting : settings) {
-            if (SETTING_KEY.equals(setting.getName())) {
-                String csv = setting.getValue();
-                if (csv == null || csv.trim().isEmpty()) {
-                    return Collections.emptySet();
-                }
-// Inside getAllowedNumbers(), replace everything after csv is declared:
-                Set<String> numbers = new HashSet<>();
-                for (String entry : csv.split(",")) {
-                    String trimmed = entry.trim();
-                    if (trimmed.equals("*")) {
-                        numbers.add("WILDCARD");
-                    } else if (!trimmed.isEmpty()) {
-                        numbers.add(normalize(trimmed));
-                    }
-                }
-                Log.d(TAG, "Loaded " + numbers.size() + " allowed numbers");
-                return numbers;
-            }
-        }
-
-        Log.w(TAG, "No '" + SETTING_KEY + "' setting found in MDM config");
+   public Set<String> getAllowedNumbers() {
+    ServerConfig config = SettingsHelper.getInstance(context).getConfig();
+    if (config == null) {
+        Log.w(TAG, "No MDM config loaded yet — whitelist empty");
         return Collections.emptySet();
     }
+
+    List<ApplicationSetting> settings = config.getApplicationSettings();
+    if (settings == null) {
+        return Collections.emptySet();
+    }
+
+    for (ApplicationSetting setting : settings) {
+        if (SETTING_KEY.equals(setting.getName())) {
+            String csv = setting.getValue();
+            if (csv == null || csv.trim().isEmpty()) {
+                return Collections.emptySet();
+            }
+            // Cache: rebuild only when the CSV actually changes, so config
+            // pushes still take effect immediately, but repeated lookups
+            // don't re-parse 100+ numbers on every single call.
+            if (csv.equals(cachedCsv) && cachedNumbers != null) {
+                return cachedNumbers;
+            }
+            Set<String> numbers = new HashSet<>();
+            for (String entry : csv.split(",")) {
+                String trimmed = entry.trim();
+                if (trimmed.equals("*")) {
+                    numbers.add("WILDCARD");
+                } else if (!trimmed.isEmpty()) {
+                    numbers.add(normalize(trimmed));
+                }
+            }
+            cachedCsv = csv;
+            cachedNumbers = numbers;
+            Log.d(TAG, "Loaded " + numbers.size() + " allowed numbers");
+            return numbers;
+        }
+    }
+
+    Log.w(TAG, "No '" + SETTING_KEY + "' setting found in MDM config");
+    return Collections.emptySet();
+}
 
     /**
      * Returns true if the given number is on the allowed list.

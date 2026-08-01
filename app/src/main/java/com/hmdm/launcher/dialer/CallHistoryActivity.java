@@ -67,6 +67,9 @@ public class CallHistoryActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(
+                android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         setContentView(R.layout.activity_call_history);
 
         RecyclerView recyclerView = findViewById(R.id.history_list);
@@ -196,7 +199,8 @@ public class CallHistoryActivity extends AppCompatActivity
     }
 
     AsyncTask.execute(() -> {
-        // Build a normalized number -> name map from contacts ONCE.
+    long t0 = System.currentTimeMillis();
+    // Build a normalized number -> name map from contacts ONCE.
         // Every history row then resolves in memory with no per-row
         // provider query, which is what was making the list slow to load.
         Map<String, String> contactNames = new HashMap<>();
@@ -276,7 +280,7 @@ public class CallHistoryActivity extends AppCompatActivity
             }
             cursor.close();
         }
-
+        android.util.Log.d(TAG, "history bg total: " + (System.currentTimeMillis() - t0) + "ms, rows=" + loaded.size());
         allItems = loaded;
         runOnUiThread(this::applyFilter);
     });
