@@ -327,34 +327,44 @@ public class InCallActivity extends AppCompatActivity {
     // Hardware keys — send DTMF for number keys when dialpad is open
     // =========================================================================
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG, "onKeyDown: keyCode=" + keyCode
-                + " (" + KeyEvent.keyCodeToString(keyCode) + ")");
+   @Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+    Log.d(TAG, "onKeyDown: keyCode=" + keyCode
+            + " (" + KeyEvent.keyCodeToString(keyCode) + ")");
 
-        // When dialpad is visible, number/star/pound keys send DTMF
-        if (dialpadVisible) {
-            char tone = keyCodeToTone(keyCode);
-            if (tone != 0) {
-                sendDtmf(tone);
-                return true;
+    // A digit/star/pound press auto-opens the dialpad, then plays a
+    // self-terminating tone. We do NOT wait for onKeyUp — this Kyocera
+    // matrix keypad doesn't reliably deliver it, which would leave the
+    // tone playing forever and hang the call.
+    char tone = keyCodeToTone(keyCode);
+    if (tone != 0) {
+        if (event.getRepeatCount() == 0) {   // ignore auto-repeat while held
+            if (!dialpadVisible) {
+                toggleDialpad();
             }
+            playDtmfBurst(tone);
+            appendDialedDigit(tone);
         }
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_F3:
-                toggleSpeaker();
-                return true;
-            case KeyEvent.KEYCODE_ENDCALL:
-            case KeyEvent.KEYCODE_CLEAR:
-                case KeyEvent.KEYCODE_POWER:
-                hangUp();
-                return true;
-            case KeyEvent.KEYCODE_BACK:
-                if (dialpadVisible) { toggleDialpad(); return true; }
-                return true; // back does nothing else during a call
-        }
-        return super.onKeyDown(keyCode, event);
+        return true;
     }
+
+    switch (keyCode) {
+        case KeyEvent.KEYCODE_F3:
+            if (event.getRepeatCount() == 0) {   // one toggle per press, not per repeat
+                toggleSpeaker();
+            }
+            return true;
+        case KeyEvent.KEYCODE_ENDCALL:
+        case KeyEvent.KEYCODE_CLEAR:
+        case KeyEvent.KEYCODE_POWER:
+            hangUp();
+            return true;
+        case KeyEvent.KEYCODE_BACK:
+            if (dialpadVisible) { toggleDialpad(); return true; }
+            return true; // back does nothing else during a call
+    }
+    return super.onKeyDown(keyCode, event);
+}
     @Override
     public void onBackPressed() {
         // On this Kyocera device the physical END key maps to KEYCODE_BACK.
@@ -370,15 +380,6 @@ public class InCallActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        // A digit/star/pound press auto-opens the dialpad, then sends the tone.
-        char tone = keyCodeToTone(keyCode);
-        if (tone != 0) {
-            if (!dialpadVisible) {
-                toggleDialpad();   // open the pad on first digit
-            }
-            sendDtmf(tone);
-            return true;
-        }
         return super.onKeyUp(keyCode, event);
     }
 
@@ -484,7 +485,12 @@ protected void onPause() {
         if (call != null) call.disconnect();
         finish();
     }
-
+    private void playDtmfBurst(char tone) {
+        sendDtmf(tone);
+        // Kyocera matrix keypad doesn't reliably deliver onKeyUp, so stop the
+        // tone ourselves after a short fixed duration instead of on key release.
+        timerHandler.postDelayed(this::stopDtmf, 150);
+    }
     private void toggleMute() {
         isMuted = !isMuted;
         HmdmInCallService service = HmdmInCallService.getInstance();
