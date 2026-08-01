@@ -50,6 +50,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.telecom.Call;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -105,6 +106,7 @@ import com.hmdm.launcher.pro.service.CheckForegroundApplicationService;
 import com.hmdm.launcher.receiver.ScreenOffReceiver;
 import com.hmdm.launcher.server.ServerServiceKeeper;
 import com.hmdm.launcher.server.UnsafeOkHttpClient;
+import com.hmdm.launcher.service.HmdmInCallService;
 import com.hmdm.launcher.service.LocationService;
 import com.hmdm.launcher.service.PluginApiService;
 import com.hmdm.launcher.service.StatusControlService;
@@ -519,6 +521,7 @@ public class MainActivity
         }
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_POWER:
                 // No active call — don't consume ACTION_DOWN, so a long-press
                 // can still reach the system power-off dialog.
                 return super.onKeyDown(keyCode, event);
@@ -538,10 +541,21 @@ public class MainActivity
         }
         return super.onKeyDown(keyCode, event);
     }
-
+    @Override
+    public void onBackPressed() {
+        // If a call is active, END key (KEYCODE_BACK) should surface InCallActivity,
+        // not navigate back through the launcher.
+        Call activeCall = HmdmInCallService.getCurrentCall();
+        if (activeCall != null) {
+            CallKeyRouter.routeToInCall(this, activeCall);
+            return;
+        }
+        super.onBackPressed();
+    }
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_ENDCALL && !event.isCanceled()) {
+        if ((keyCode == KeyEvent.KEYCODE_ENDCALL || keyCode == KeyEvent.KEYCODE_POWER) 
+                && !event.isCanceled()) {
             // Only reached if there was no active call (router would have
             // intercepted onKeyDown otherwise) and this wasn't a long-press.
             lockScreen();
@@ -1669,7 +1683,6 @@ private void createLauncherButtons() { createExitButton(); createInfoButton(); c
         try { startActivity(intent); } catch (Exception e) { e.printStackTrace(); }
     }
 
-    @Override public void onBackPressed() {}
     @Override public void onAppChoose(@NonNull AppInfo resolveInfo) {}
 
     @Override

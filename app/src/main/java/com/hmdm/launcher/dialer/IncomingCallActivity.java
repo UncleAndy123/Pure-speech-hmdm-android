@@ -188,6 +188,8 @@ public class IncomingCallActivity extends AppCompatActivity {
                 return true;
 
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_CLEAR:
+            case KeyEvent.KEYCODE_POWER:
                 // Red end key — reject
                 rejectCall();
                 finish();
@@ -202,6 +204,13 @@ public class IncomingCallActivity extends AppCompatActivity {
             default:
                 return super.onKeyDown(keyCode, event);
         }
+    }
+    @Override
+    public void onBackPressed() {
+        // Physical END key maps to KEYCODE_BACK on this Kyocera — reject the call.
+        Log.d(TAG, "onBackPressed — END key (KEYCODE_BACK) — rejecting call");
+        rejectCall();
+        finish();
     }
 
     // -------------------------------------------------------------------------

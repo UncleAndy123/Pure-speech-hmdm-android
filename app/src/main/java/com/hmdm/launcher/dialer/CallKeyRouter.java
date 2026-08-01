@@ -17,21 +17,59 @@ import com.hmdm.launcher.service.HmdmInCallService;
  */
 public class CallKeyRouter {
 
-    public static boolean handleKeyDown(Activity activity, int keyCode, KeyEvent event) {
-        if (keyCode != KeyEvent.KEYCODE_CALL && keyCode != KeyEvent.KEYCODE_ENDCALL) {
-            return false;
-        }
+public static boolean handleKeyDown(Activity activity, int keyCode, KeyEvent event) {
+    if (keyCode != KeyEvent.KEYCODE_CALL &&
+            keyCode != KeyEvent.KEYCODE_ENDCALL &&
+            keyCode != KeyEvent.KEYCODE_CLEAR &&
+            keyCode != KeyEvent.KEYCODE_POWER) {
+        return false;
+    }
 
-        Call activeCall = HmdmInCallService.getCurrentCall();
-        if (activeCall == null) {
-            return false; // No active call — let the caller's normal key handling proceed.
-        }
+    Call activeCall = HmdmInCallService.getCurrentCall();
+    if (activeCall == null) {
+        return false;
+    }
 
-        // A call is in progress: always surface it instead of taking any
-        // other action (dial, lock, hangup) directly from this screen.
-        Intent intent = new Intent(activity, InCallActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        activity.startActivity(intent);
+    // Don't relaunch if we're already showing the in-call screen —
+    // avoids stacking duplicate blank instances on repeated key presses.
+    if (activity instanceof InCallActivity) {
+        return false;
+    }
+
+    // If the user pressed ENDCALL or POWER during a call, hang up 
+    // immediately rather than just switching to the in-call screen.
+    if (keyCode == KeyEvent.KEYCODE_ENDCALL ||
+            keyCode == KeyEvent.KEYCODE_CLEAR ||
+            keyCode == KeyEvent.KEYCODE_POWER) {
+        activeCall.disconnect();
         return true;
+    }
+
+
+    String number = (activeCall.getDetails().getHandle() != null)
+            ? activeCall.getDetails().getHandle().getSchemeSpecificPart()
+            : "";
+    boolean isActive = activeCall.getState() == Call.STATE_ACTIVE;
+
+    Intent intent = new Intent(activity, InCallActivity.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    intent.putExtra(InCallActivity.EXTRA_CALLER_NAME, number);   // name resolution not critical here — number is enough
+    intent.putExtra(InCallActivity.EXTRA_CALLER_NUMBER, number);
+    intent.putExtra(InCallActivity.EXTRA_IS_CONNECTED, isActive);
+    routeToInCall(activity, activeCall);
+    return true;
+}
+
+    /** Called from onBackPressed() in activities that are not InCallActivity. */
+    public static void routeToInCall(Activity activity, Call activeCall) {
+        String number = (activeCall.getDetails().getHandle() != null)
+                ? activeCall.getDetails().getHandle().getSchemeSpecificPart() : "";
+        boolean isActive = activeCall.getState() == Call.STATE_ACTIVE;
+        Intent intent = new Intent(activity, InCallActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(InCallActivity.EXTRA_CALLER_NAME, number);
+        intent.putExtra(InCallActivity.EXTRA_CALLER_NUMBER, number);
+        intent.putExtra(InCallActivity.EXTRA_IS_CONNECTED, isActive);
+        activity.startActivity(intent);
     }
 }

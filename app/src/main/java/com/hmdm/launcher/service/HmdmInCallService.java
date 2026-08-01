@@ -12,6 +12,8 @@
 package com.hmdm.launcher.service;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -24,6 +26,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.hmdm.launcher.R;
 import com.hmdm.launcher.dialer.InCallActivity;
 import com.hmdm.launcher.dialer.IncomingCallActivity;
 import com.hmdm.launcher.util.CallWhitelistManager;
@@ -52,7 +55,43 @@ public class HmdmInCallService extends InCallService {
                 ? CallAudioState.ROUTE_SPEAKER
                 : CallAudioState.ROUTE_EARPIECE);
     }
+    private void postMissedCallNotification(String name, String number) {
+        Intent intent = new Intent(this, com.hmdm.launcher.dialer.DialerActivity.class);
+        intent.putExtra(com.hmdm.launcher.dialer.DialerActivity.EXTRA_OPEN_TAB,
+                com.hmdm.launcher.dialer.DialerActivity.TAB_MISSED);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+        android.app.NotificationManager nm =
+                (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        String channelId = "missed_calls";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                    channelId, "Missed Calls", android.app.NotificationManager.IMPORTANCE_HIGH);
+            nm.createNotificationChannel(channel);
+        }
+
+        android.app.Notification notification = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notification = new Notification.Builder(this, channelId)
+                    .setSmallIcon(R.drawable.ic_call)
+                    .setContentTitle("Missed call")
+                    .setContentText(name)
+                    .setContentIntent(pi)
+                    .setAutoCancel(true)
+                    .build();
+        } else {
+            notification = new Notification.Builder(this)
+                    .setSmallIcon(R.drawable.ic_call)
+                    .setContentTitle("Missed call")
+                    .setContentText(name)
+                    .setContentIntent(pi)
+                    .setAutoCancel(true)
+                    .build();
+        }
+        nm.notify(number.hashCode(), notification);
+    }
     // =========================================================================
     // onCallAdded — entry point for every call
     // =========================================================================

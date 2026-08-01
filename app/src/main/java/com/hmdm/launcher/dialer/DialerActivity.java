@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.telecom.Call;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -43,6 +44,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hmdm.launcher.R;
+import com.hmdm.launcher.service.HmdmInCallService;
 import com.hmdm.launcher.util.CallWhitelistManager;
 
 import java.text.SimpleDateFormat;
@@ -60,11 +62,12 @@ public class DialerActivity extends AppCompatActivity
     // -----------------------------------------------------------------------
     private static final int TAB_ALL      = 0;
     private static final int TAB_CONTACTS = 1;
-    private static final int TAB_MISSED   = 2;
+    public static final int TAB_MISSED   = 2;
     private static final int TAB_INCOMING = 3;
     private static final int TAB_OUTGOING = 4;
 
     private int currentTab = TAB_CONTACTS;
+    public static final String EXTRA_OPEN_TAB = "open_tab";
 
     // -----------------------------------------------------------------------
     // Views — contacts section
@@ -221,6 +224,11 @@ for (int i = 0; i < tabButtons.length; i++) {
         // ---- Initial state ---- This is what the dialer will open up to.
         switchTab(TAB_CONTACTS);
         loadContacts();
+        int requestedTab = getIntent().getIntExtra(EXTRA_OPEN_TAB, -1);
+        if (requestedTab != -1) {
+            switchTab(requestedTab);
+        }
+
     }
 
     @Override
@@ -500,7 +508,17 @@ private void switchTab(int tab) {
     // Hardware keys
     // =========================================================================
 
-
+    @Override
+    public void onBackPressed() {
+        // If a call is active, END key (KEYCODE_BACK) should surface InCallActivity,
+        // not navigate back through the launcher.
+        Call activeCall = HmdmInCallService.getCurrentCall();
+        if (activeCall != null) {
+            CallKeyRouter.routeToInCall(this, activeCall);
+            return;
+        }
+        super.onBackPressed();
+    }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (CallKeyRouter.handleKeyDown(this, keyCode, event)) {
@@ -508,6 +526,7 @@ private void switchTab(int tab) {
         }
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_POWER:
                 // No active call (router would have intercepted otherwise) — just close dialer.
                 finish();
                 return true;

@@ -58,6 +58,7 @@ public class InCallActivity extends AppCompatActivity {
     private Button       hangupBtn;
     private LinearLayout dialpadSection;
     private TextView     dialedDigitsView;
+    private boolean callEndedByCallback = false;
 
     // -------------------------------------------------------------------------
     // State
@@ -112,6 +113,7 @@ public class InCallActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Received ACTION_CALL_ENDED — finishing InCallActivity");
+            callEndedByCallback = true;
             finish();
         }
     };
@@ -128,6 +130,7 @@ public class InCallActivity extends AppCompatActivity {
                 runOnUiThread(() -> transitionToConnected());
             } else if (state == Call.STATE_DISCONNECTED ||
                     state == Call.STATE_DISCONNECTING) {
+                callEndedByCallback = true;
                 runOnUiThread(() -> finish());
             }
         }
@@ -326,6 +329,9 @@ public class InCallActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.d(TAG, "onKeyDown: keyCode=" + keyCode
+                + " (" + KeyEvent.keyCodeToString(keyCode) + ")");
+
         // When dialpad is visible, number/star/pound keys send DTMF
         if (dialpadVisible) {
             char tone = keyCodeToTone(keyCode);
@@ -336,6 +342,8 @@ public class InCallActivity extends AppCompatActivity {
         }
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_CLEAR:
+                case KeyEvent.KEYCODE_POWER:
                 hangUp();
                 return true;
             case KeyEvent.KEYCODE_BACK:
@@ -344,6 +352,18 @@ public class InCallActivity extends AppCompatActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+    @Override
+    public void onBackPressed() {
+        // On this Kyocera device the physical END key maps to KEYCODE_BACK.
+        // AppCompatActivity intercepts BACK before onKeyDown fires, so we
+        // override onBackPressed() instead. Never close InCallActivity while
+        // a call is active — hang up instead.
+        Log.d(TAG, "onBackPressed — END key (KEYCODE_BACK) — hanging up");
+        hangUp();
+        // Do NOT call super.onBackPressed() — that would finish() without hanging up.
+    }
+
+
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -410,6 +430,19 @@ protected void onPause() {
             try { call.unregisterCallback(callCallback); } catch (Exception e) { /* ignore */ }
         }
         stopDtmf(); // safety — stop any held tone
+
+        // The physical END key on this Kyocera closes this window through a path
+        // that bypasses onKeyDown / onBackPressed / onUserLeaveHint. It cannot
+        // bypass onDestroy. If we're torn down while the call is still active
+        // (i.e. NOT because the call already ended), the user pressed END —
+        // treat that as hang up.
+        if (!callEndedByCallback && call != null
+                && call.getState() != Call.STATE_DISCONNECTED
+                && call.getState() != Call.STATE_DISCONNECTING) {
+            Log.d(TAG, "onDestroy — call still active, hanging up (END key closed screen)");
+            call.disconnect();
+        }
+
         Log.d(TAG, "onDestroy");
     }
 
@@ -441,6 +474,7 @@ protected void onPause() {
 
     private void hangUp() {
         Log.d(TAG, "hangUp()");
+        callEndedByCallback = true;
         stopDtmf();
         Call call = HmdmInCallService.getCurrentCall();
         if (call != null) call.disconnect();
