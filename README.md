@@ -5,15 +5,16 @@ A powerful open-source Android MDM launcher, forked from [h-mdm/hmdm-android](ht
 
 ---
 
-## What This Fork Adds
+## Why I forked it:
 
 This fork extends the upstream Headwind MDM Android client with:
 
 - **Call whitelisting** — incoming calls are screened via `CallScreeningService`; only numbers in the configured whitelist are allowed through
-- **Custom dialer** — built-in dialer app that shows all contacts but blocks outgoing calls to non-whitelisted numbers, with auto-formatted phone number input
+- **Custom dialer** — built-in dialer app that shows all contacts but blocks outgoing calls to non-whitelisted numbers.
+At some point the dialer will likely be split into a separate application entirely. I was not aware of the scope of the project when beginning.
 - **SMS/MMS filtering** — push a whitelist or blocklist to the companion [DPAD-Messaging](https://github.com/UncleAndy123/DPAD-Messaging) app via Device Owner restrictions; messages from non-permitted numbers are silently dropped before storage
 - **Device Owner enforcement** — whitelist and dialer default are set silently on enrollment (API 29+); no user prompts needed
-- **Offline resilience** — the whitelist is stored locally from the last policy sync and remains enforced even when the server is unreachable
+- **Offline Control** — the whitelist is stored locally from the last policy sync and remains enforced even when the server is unreachable
 
 ---
 
@@ -21,7 +22,8 @@ This fork extends the upstream Headwind MDM Android client with:
 
 ### Call filtering — `CallWhitelistManager.java`
 
-Reads the `allowed_numbers` application setting from the locally cached MDM config and checks incoming/outgoing numbers against it. Used by `CallWhitelistScreeningService` (incoming) and `HmdmInCallService` (outgoing). This class is read-only — it has no knowledge of the messaging app.
+Reads the `allowed_numbers` application setting from the locally cached MDM config and checks incoming/outgoing numbers against it. Used by `CallWhitelistScreeningService` (incoming) and `HmdmInCallService` (outgoing). Currently separate from the messaging app. 
+Plans are to add support for a blocklist mode. 
 
 ### SMS/MMS filtering — `SmsFilterManager.java`
 
@@ -29,7 +31,6 @@ Reads three SMS-specific application settings from the locally cached MDM config
 
 DPAD-Messaging reads this bundle on every incoming message via `RestrictionsManager` and drops messages that fail the filter before they are written to the system SMS/MMS store.
 
-These two classes are deliberately separate — `CallWhitelistManager` owns call enforcement; `SmsFilterManager` owns the SMS config delivery pipeline.
 
 ---
 
@@ -41,11 +42,9 @@ Licensed under the **Apache 2.0 License**. You may fork, modify, and distribute 
 
 ## Prerequisites
 
-- Android Studio (latest stable)
-- Android SDK
-- A signing keystore for APK release builds
+- Android Studio
+- A signing keystore for APK release builds.
 - A running Headwind MDM server (see [hmdm-server](https://github.com/h-mdm/hmdm-server) or the Docker setup below)
-- ADB installed and on your PATH for device enrollment
 
 ---
 
@@ -53,7 +52,7 @@ Licensed under the **Apache 2.0 License**. You may fork, modify, and distribute 
 
 1. Clone this repository
 2. Open the project directory in Android Studio using the default import settings
-3. The project is ready to build
+
 
 ---
 
@@ -99,11 +98,6 @@ After enrolling the device, configure the call whitelist in the Headwind MDM adm
 
 > **Wildcard:** Set the value to `*` to allow all calls (disables filtering without removing the setting).
 
-> **Emulator testing:** The emulator reports a fake number when you place a test call from Extended Controls. Check your Logcat for the exact string the screening service sees:
-> ```
-> D/CallScreening: Screening call from: XXXX
-> ```
-> Use that exact value in `allowed_numbers` when testing on emulator.
 
 ---
 
