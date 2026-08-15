@@ -129,7 +129,7 @@ Add the following entries in **Configurations → your config → Application Se
 
 > **Requires Device Owner.** The launcher must be Device Owner (set via ADB at enrollment) for `setApplicationRestrictions()` to succeed. On non-Device-Owner builds the push silently no-ops and SMS filtering is disabled.
 
-> **Both apps must be signed with your key.** Since DPAD-Messaging is a fork you build and sideload, ensure both APKs are signed with the same release keystore so that the restriction delivery cannot be spoofed by a different messaging app.
+> **Both apps must be signed with your key.** Ensure both APKs are signed with the same release keystore so that the restriction delivery cannot be spoofed by a different messaging app. The security features are still in the making. Possibly the MDM should specify a messaging app signature???
 
 ---
 
